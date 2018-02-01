@@ -55,6 +55,18 @@ int main(void)
     std::cout << "Renderer: " << renderer << std::endl;
     std::cout << "OpenGL version supported: " << version << std::endl;
     std::cout << "GLFW Version String: " << glfwGetVersionString() << std::endl;
+    GLint major_version, minor_version, max_texture_size;
+    GLboolean depth_test;
+    glGetIntegerv(GL_MAJOR_VERSION, &major_version);
+    std::cout << "OpenGL Major Version: " << major_version << std::endl;
+    glGetIntegerv(GL_MINOR_VERSION, &minor_version);
+    std::cout << "OpenGL Minor Version: " << minor_version << std::endl;
+    glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, &max_texture_size);
+    std::cout << "OpenGL Max Texture Size: " << max_texture_size << std::endl;
+    glGetBooleanv(GL_DEPTH_TEST, &depth_test);
+    std::cout << "Depth test active: ";
+    if(depth_test) std::cout << "true" << std::endl;
+    else std::cout << "false" << std::endl;
 
     // Need to tell OpenGL how big the window is going to be so it can
     // create enough memory on the graphics card to store the pixel
@@ -67,11 +79,13 @@ int main(void)
     glViewport(0, 0, fb_width, fb_height);
 
     // Set the background color for our window
-    glClearColor(0.8, 0.4, 0.0, 0.0);
+    glClearColor(0.8, 0.4, 0.0, 1.0);
 
+	double start_time, end_time;
     // Loop until the user closes the window 
     while (!glfwWindowShouldClose(window))
     {
+	start_time = glfwGetTime();
         // Clear the window's buffer (or clear the screen to our
         // background color)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -88,6 +102,9 @@ int main(void)
         glfwPollEvents();
         if (glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, 1);
+		end_time = glfwGetTime();
+		if (glfwGetKey( window, GLFW_KEY_T ) == GLFW_PRESS)
+	    	std::cout << "Frame Rate: " << (1/(end_time - start_time)) << std::endl;
     }
   
     // Terminate the application, close the window and clean-up any
