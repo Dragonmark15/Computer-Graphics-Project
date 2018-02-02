@@ -1,0 +1,25 @@
+Camera : Perspective
+Camera : Orthonormal
+	Difference = ray generation method
+	Pass in an orthonormal basis
+	Computer your own U(right-of-camera), V(above-camera), and W(behind-camera)
+Shape [virtual interface]
+	intersect()
+Sphere
+	Vector3D Center
+	float radius
+	bool intersect(Ray)
+	boid intersect(Ray, tMin, &tMax, &hitStructure)
+
+Camera
+Perspective
+(later)Orthographic
+(later)Light
+Model/Shape (Create an array of shapes for the camera to use)
+Scene (interface connecting everything)
+Sphere
+Triangle
+
+Camera is passed in the screen data to determine vector direction
+Camera calls a double for-loop to pass in each object per pixel
+Each pixel calls the intersect on each object in the scene
