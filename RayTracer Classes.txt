@@ -11,7 +11,7 @@ Sphere
 	bool intersect(Ray)
 	boid intersect(Ray, tMin, &tMax, &hitStructure)
 
-Camera
+Camera (nx, ny = pixel length, width) (check the XML  parser file)
 Perspective
 (later)Orthographic
 (later)Light
