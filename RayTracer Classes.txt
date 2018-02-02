@@ -9,7 +9,7 @@ Sphere
 	Vector3D Center
 	float radius
 	bool intersect(Ray)
-	boid intersect(Ray, tMin, &tMax, &hitStructure)
+	void intersect(Ray, tMin, &tMax, &hitStructure)
 
 Camera (nx, ny = pixel length, width) (check the XML  parser file)
 Perspective
