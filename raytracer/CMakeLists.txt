@@ -1,8 +1,8 @@
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/raytracer)
 
-add_executable(test_scene
-	testScene.cpp
+add_executable(Ray_Tracer
+	Scene.cpp
 	camera.h camera.cpp
 	shape.h
 	sphere.cpp sphere.h
