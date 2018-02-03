@@ -8,7 +8,7 @@ add_executable(Ray_Tracer
 	sphere.cpp sphere.h
 )
 
-target_link_libraries(test_scene sive-util)
-target_link_libraries(test_scene ${Boost_PROGRAM_OPTIONS_LIBRARIES})
-target_link_libraries(test_scene ${PNG_LIBRARY})
-target_link_libraries(test_scene ${ZLIB_LIBRARY})
+target_link_libraries(Ray_Tracer sive-util)
+target_link_libraries(Ray_Tracer ${Boost_PROGRAM_OPTIONS_LIBRARIES})
+target_link_libraries(Ray_Tracer ${PNG_LIBRARY})
+target_link_libraries(Ray_Tracer ${ZLIB_LIBRARY})
