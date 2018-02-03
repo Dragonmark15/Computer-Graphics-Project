@@ -15,14 +15,14 @@ void Sphere::intersect(const Vector3D origin, const Vector3D direction, float tM
 	tValue testValue = calculateT(origin, direction);
 	if(testValue.t1real) {
 		if(testValue.t2real && testValue.t2 > testValue.t1) {
-			if(testValue.t2 > tmin && testVale.t2 < *tMax) {
-				*tMax = testValue.t2;
-				*inputColor = color;
+			if(testValue.t2 > tMin && testValue.t2 < tMax) {
+				tMax = testValue.t2;
+				inputColor = color;
 			}
 		}
-		else if(testValue.t1 > tmin && testVale.t1 < *tMax) {
-			*tMax = testValue.t1;
-			*inputColor = color;
+		else if(testValue.t1 > tMin && testValue.t1 < tMax) {
+			tMax = testValue.t1;
+			inputColor = color;
 		}
 	}
 }
@@ -32,13 +32,13 @@ bool Sphere::intersect(const Vector3D origin, const Vector3D direction) {
 	return testValue.t1real;
 }
 
-tValue calculateT(const Vector3D origin, const Vector3D direction) {
+tValue Sphere::calculateT(const Vector3D origin, const Vector3D direction) {
 	tValue returnValue;
 	double A, B, C; //Represent the values of A, B, and C in the quadratic formula
 	//Calculating A
-	A = direction.dot(&direction);
+	A = direction.dot(direction);
 	//Calculating B
-	B = direction.dot(&(origin-center));
+	B = direction.dot((origin-center));
 	//Calculating C
 	Vector3D tempVector = (origin-center);
 	C = tempVector.dot(tempVector) - (radius * radius);
@@ -48,12 +48,12 @@ tValue calculateT(const Vector3D origin, const Vector3D direction) {
 		returnValue.t1real = true;
 		returnValue.t2real = true;
 	}
-	if(discriminant < 0.001 && discriminant > -0.001) {
+	else if(discriminant < 0.001 && discriminant > -0.001) {
 		discriminant = 0; //Prevent errors if it's negative, but still in range
 		returnValue.t1real = true;
 		returnValue.t2real = false;
 	}
-	if(discriminant < -0.001) {
+	else if(discriminant < -0.001) {
 		returnValue.t1real = false;
 		returnValue.t2real = false;
 	}

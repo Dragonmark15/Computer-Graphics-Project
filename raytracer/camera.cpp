@@ -16,14 +16,13 @@ Camera::Camera(std::string inputType,
 	//Set camera type
 	if(inputType == "perspective") mainData.type = perspective;
 	else if(inputType == "orthographic") mainData.type = orthographic;
-	else printf("ERROR: type incorrectly set");
 	//Set remaining data
 	mainData.position = inputPosition;
 	mainData.direction = inputDirection;
 	mainData.focalLength = inputFocalLength;
 	mainData.imagePlaneWidth = inputImagePlaneWidth;
 	mainData.pixelWidth = inputPixelWidth;
-	mainData.pixelheight = inputPixelHeight;
+	mainData.pixelHeight = inputPixelHeight;
 }
 
 Camera::~Camera() {
@@ -48,8 +47,9 @@ Vector3D Camera::genRay(int x, int y) { //x,y ranges from [0,pixelWidth] or [0,p
 		returnVector += mainData.direction; //Add the changes to view direction so that it can follow the camera
 	}
 	else {
-		returnVector = NULL;
+		returnVector.set(0,0,0); //TODO:Fix this. Causes a Div0 error
 	}
+	return returnVector;
 }
 
 

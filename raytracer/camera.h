@@ -5,6 +5,8 @@
 
 #include "Vector3D.h"
 
+using namespace sivelab;
+
 class Camera {
 public:
 	enum CamType { perspective, orthographic };
@@ -24,6 +26,7 @@ public:
 	int getPixelWidth() {return mainData.pixelWidth;}
 	int getPixelHeight() {return mainData.pixelHeight;}
 	Vector3D getPosition() {return mainData.position;}
+	float getFocalLength() {return mainData.focalLength;}
 protected:
 	struct cameraData {		
 		CamType type;
@@ -32,9 +35,9 @@ protected:
 		float focalLength;
 		float imagePlaneWidth;
 		int pixelWidth, pixelHeight;
-	}
+	};
 	cameraData mainData;
 
-}
+};
 
 #endif
