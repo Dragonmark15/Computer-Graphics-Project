@@ -4,6 +4,7 @@
 //#include <string>
 
 #include "Vector3D.h"
+#include "shape.h"
 
 class Sphere : public Shape {
 public:

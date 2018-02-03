@@ -49,6 +49,7 @@ tValue calculateT(const Vector3D origin, const Vector3D direction) {
 		returnValue.t2real = true;
 	}
 	if(discriminant < 0.001 && discriminant > -0.001) {
+		discriminant = 0; //Prevent errors if it's negative, but still in range
 		returnValue.t1real = true;
 		returnValue.t2real = false;
 	}

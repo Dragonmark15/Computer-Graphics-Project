@@ -18,7 +18,12 @@ public:
 				   int inputPixelWidth,
 				   int inputPixelHeight);
 	~Camera();
+
 	Vector3D genRay(int x, int y);
+
+	int getPixelWidth() {return mainData.pixelWidth;}
+	int getPixelHeight() {return mainData.pixelHeight;}
+	Vector3D getPosition() {return mainData.position;}
 protected:
 	struct cameraData {		
 		CamType type;

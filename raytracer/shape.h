@@ -7,8 +7,8 @@
 
 class Shape {
 public:
-	virtual void intersect(const Vector3D VectorIn, float tMin, float &tMax, Vector3D &inputColor);
-	virtual bool intersect(const Vector3D VectorIn);
+	virtual void intersect(const Vector3D origin, const Vector3D direction, float tMin, float &tMax, Vector3D &inputColor);
+	virtual bool intersect(const Vector3D origin, const Vector3D direction);
 protected:
 	Vector3D color;
 /*	struct HitStructure {
