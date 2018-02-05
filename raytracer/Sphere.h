@@ -16,11 +16,12 @@ struct tValue {
 
 class Sphere : public Shape {
 public:
+	~Sphere(){}
 	Sphere(Vector3D inputCenter, float inputRadius);
 	Sphere(Vector3D inputCenter, float inputRadius, Vector3D inputColor);
 	void intersect(const Vector3D origin, const Vector3D direction, float tMin, float &tMax, Vector3D &inputColor);
 	bool intersect(const Vector3D origin, const Vector3D direction);
-	Vector3D getcolor() {return color;}
+	Vector3D getColor() {return color;}
 	/*
 	virtual void intersect(const Vector3D origin, const Vector3D direction, float tMin, float &tMax, HitStructure &h);
 	virtual bool intersect(const Vector3D origin, const Vector3D direction);

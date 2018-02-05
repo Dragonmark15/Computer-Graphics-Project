@@ -21,8 +21,8 @@ Scene::Scene(int argc, char *argv[])
 
 	// register object creation function with xmlScene
 	xmlScene.registerCallback("camera", this);
-	//xmlScene.registerCallback("light", sceneFactory); //TODO:Pulled for now, since lights haven't been implimented
-	//xmlScene.registerCallback("shader", sceneFactory); //TODO:Pulled for now, since shaders haven't been implimented
+	xmlScene.registerCallback("light", this); //TODO:Pulled for now, since lights haven't been implimented
+	xmlScene.registerCallback("shader", this); //TODO:Pulled for now, since shaders haven't been implimented
 	xmlScene.registerCallback("shape", this);
 
 	if (args.inputFileName != "")
@@ -40,14 +40,22 @@ Scene::Scene(int argc, char *argv[])
 void Scene::genImage(){
 	png::image< png::rgb_pixel > imData( mainCamera.getPixelWidth(), mainCamera.getPixelHeight() );
 	Vector3D pixelColor;
-	float dummyTMax;
+	float tMax;
 	for (size_t y = 0; y < imData.get_height(); ++y)
 	{
 		for (size_t x = 0; x < imData.get_width(); ++x)
 		{
 			pixelColor.set(bgColor);
-			dummyTMax = 1000;
-			shapeList.back()->intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), dummyTMax, pixelColor);
+			tMax = 1000000;
+			Sphere * nextSphere = dynamic_cast<Sphere*>(shapeList.back());
+////////////////////////////////////////////
+std::cout << "Before intersect" << std::endl;
+////////////////////////////////////////////
+/*std::cout << "Sphere Color:" << nextSphere->getColor()[0] << " " << nextSphere->getColor()[1] << " " << nextSphere->getColor()[2] << " " << std::endl;*/
+			nextSphere->intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), tMax, pixelColor);
+////////////////////////////////////////////
+std::cout << "After intersect" << std::endl;
+////////////////////////////////////////////
 			shapeList.pop_back();
 			imData[y][x] = png::rgb_pixel(pixelColor[0], pixelColor[1], pixelColor[2]);
 		}
@@ -78,7 +86,7 @@ void Scene::instance( ptree::value_type const &v )
       buf.str( *pBGColor );
       buf >> spData.backgroundColor;
       buf.clear();
-    } 
+    }
 
     if (pEnvMapPrefix) {
       buf.str( *pEnvMapPrefix );
@@ -92,6 +100,7 @@ void Scene::instance( ptree::value_type const &v )
     }
 
 	bgColor = spData.backgroundColor;
+
   }
 
   //
