@@ -12,13 +12,7 @@ Sphere::Sphere(Vector3D inputCenter, float inputRadius, Vector3D inputColor) {
 }
 
 void Sphere::intersect(const Vector3D origin, const Vector3D direction, float tMin, float &tMax, Vector3D &inputColor) {
-////////////////////////////////////////////
-std::cout << "Inside intersect" << std::endl;
-////////////////////////////////////////////
 	tValue testValue = calculateT(origin, direction);
-////////////////////////////////////////////
-std::cout << "After CalculateT" << std::endl;
-////////////////////////////////////////////
 	if(testValue.t1real) {
 		if(testValue.t2real && testValue.t2 > testValue.t1) {
 			if(testValue.t2 > tMin && testValue.t2 < tMax) {

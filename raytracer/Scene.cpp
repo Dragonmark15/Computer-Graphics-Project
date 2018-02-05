@@ -12,7 +12,8 @@ Scene::Scene(int argc, char *argv[])
 	if(args.outputFileName != "") outputFileName = args.outputFileName;
 	else outputFileName = "Untitled";
 	sceneWidth = args.width;
-	sceneHeight = args.height;	
+	sceneHeight = args.height;
+	bgColor.set(50,50,50);	//Set a default value, in case XML doesn't specify
 
 	//Begin data parse
 	XMLSceneParser xmlScene;
@@ -33,8 +34,6 @@ Scene::Scene(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	xmlScene.parseFile( args.inputFileName );
-
 }
 
 void Scene::genImage(){
@@ -45,19 +44,13 @@ void Scene::genImage(){
 	{
 		for (size_t x = 0; x < imData.get_width(); ++x)
 		{
-			pixelColor.set(bgColor);
-			tMax = 1000000;
-			Sphere * nextSphere = dynamic_cast<Sphere*>(shapeList.back());
-////////////////////////////////////////////
-std::cout << "Before intersect" << std::endl;
-////////////////////////////////////////////
-/*std::cout << "Sphere Color:" << nextSphere->getColor()[0] << " " << nextSphere->getColor()[1] << " " << nextSphere->getColor()[2] << " " << std::endl;*/
-			nextSphere->intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), tMax, pixelColor);
-////////////////////////////////////////////
-std::cout << "After intersect" << std::endl;
-////////////////////////////////////////////
-			shapeList.pop_back();
-			imData[y][x] = png::rgb_pixel(pixelColor[0], pixelColor[1], pixelColor[2]);
+			for(int i = 0; i < sphereDeque.size(); i++)
+			{
+				pixelColor.set(bgColor);
+				tMax = 1000000;
+				sphereDeque[i].intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), tMax, pixelColor);
+				imData[y][x] = png::rgb_pixel(pixelColor[0], pixelColor[1], pixelColor[2]);
+			}
 		}
 	}
 	imData.write(outputFileName);
@@ -86,8 +79,8 @@ void Scene::instance( ptree::value_type const &v )
       buf.str( *pBGColor );
       buf >> spData.backgroundColor;
       buf.clear();
+	  bgColor = spData.backgroundColor;
     }
-
     if (pEnvMapPrefix) {
       buf.str( *pEnvMapPrefix );
       buf >> spData.envMapPrefix;
@@ -99,7 +92,7 @@ void Scene::instance( ptree::value_type const &v )
       spData.usesEnvMap = false;
     }
 
-	bgColor = spData.backgroundColor;
+	
 
   }
 
@@ -268,8 +261,8 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.radius = radius;
     shape.center = center;
     shape.shader = *shaderPtr;
-	Sphere newSphere(shape.center, shape.radius, shape.shader.kd_diffuse);
-	shapeList.push_back(&newSphere);
+	Sphere newSphere(shape.center, shape.radius, (shape.shader.kd_diffuse * 255));
+	sphereDeque.push_back(newSphere);
 
     std::cout << "\tFound sphere!" << std::endl;
   }

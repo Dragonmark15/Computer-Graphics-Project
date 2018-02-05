@@ -2,7 +2,7 @@
 #define __SCENE_H__
 
 #include <string>
-#include <list>
+#include <deque>
 
 #include "Vector3D.h"
 #include "Camera.h"
@@ -25,7 +25,7 @@ private:
 	std::string outputFileName;
 	Vector3D bgColor;
 	Camera mainCamera;
-	std::list<Shape*> shapeList;
+	std::deque<Sphere> sphereDeque;
 	int sceneWidth;
 	int sceneHeight;
 
