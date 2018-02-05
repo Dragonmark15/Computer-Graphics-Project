@@ -1,6 +1,6 @@
 #include <string>
 
-#include "camera.h"
+#include "Camera.h"
 
 Camera::Camera() {
 	

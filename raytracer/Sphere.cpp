@@ -1,4 +1,4 @@
-#include "sphere.h"
+#include "Sphere.h"
 
 Sphere::Sphere(Vector3D inputCenter, float inputRadius) {
 	center = inputCenter;

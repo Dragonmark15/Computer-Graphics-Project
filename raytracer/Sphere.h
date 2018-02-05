@@ -4,7 +4,7 @@
 //#include <string>
 
 #include "Vector3D.h"
-#include "shape.h"
+#include "Shape.h"
 
 using namespace sivelab;
 struct tValue {
