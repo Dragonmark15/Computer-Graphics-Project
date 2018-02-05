@@ -2,7 +2,7 @@
 #define __SCENE_H__
 
 #include <string>
-#include <stack>
+#include <list>
 
 #include "Vector3D.h"
 #include "Camera.h"
@@ -25,7 +25,7 @@ private:
 	std::string outputFileName;
 	Vector3D bgColor;
 	Camera mainCamera;
-	std::stack<Shape*> shapeStack;
+	std::list<Shape*> shapeList;
 	int sceneWidth;
 	int sceneHeight;
 

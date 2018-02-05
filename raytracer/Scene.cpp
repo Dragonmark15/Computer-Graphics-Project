@@ -47,8 +47,8 @@ void Scene::genImage(){
 		{
 			pixelColor.set(bgColor);
 			dummyTMax = 1000;
-			shapeStack.top()->intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), dummyTMax, pixelColor);
-			shapeStack.pop();
+			shapeList.back()->intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), dummyTMax, pixelColor);
+			shapeList.pop_back();
 			imData[y][x] = png::rgb_pixel(pixelColor[0], pixelColor[1], pixelColor[2]);
 		}
 	}
@@ -260,7 +260,7 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.center = center;
     shape.shader = *shaderPtr;
 	Sphere newSphere(shape.center, shape.radius, shape.shader.kd_diffuse);
-	shapeStack.push(*newSphere);
+	shapeList.push_back(&newSphere);
 
     std::cout << "\tFound sphere!" << std::endl;
   }
