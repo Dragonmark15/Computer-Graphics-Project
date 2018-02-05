@@ -44,13 +44,13 @@ void Scene::genImage(){
 	{
 		for (size_t x = 0; x < imData.get_width(); ++x)
 		{
+			tMax = 1000000;
+			pixelColor.set(bgColor);
 			for(int i = 0; i < sphereDeque.size(); i++)
 			{
-				pixelColor.set(bgColor);
-				tMax = 1000000;
 				sphereDeque[i].intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), tMax, pixelColor);
-				imData[y][x] = png::rgb_pixel(pixelColor[0], pixelColor[1], pixelColor[2]);
 			}
+			imData[y][x] = png::rgb_pixel(pixelColor[0], pixelColor[1], pixelColor[2]);
 		}
 	}
 	imData.write(outputFileName);
