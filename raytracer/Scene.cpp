@@ -1,6 +1,5 @@
 #include "Scene.h"
 
-
 //////////////////////////////////
 //TODO: Add new file with main()//
 //////////////////////////////////
@@ -10,23 +9,21 @@ Scene::Scene(int argc, char *argv[])
  	args.process(argc, argv);
 	
 	//Set scene data retrieved from args
-	outputFileName = args.outputFileName;
-	bgColor = args.bgColor;
-	
-	//shapeStack;
-	//mainCamera;
-
+	if(args.outputFileName != "") outputFileName = args.outputFileName;
+	else outputFileName = "Untitled";
+	sceneWidth = args.width;
+	sceneHeight = args.height;	
 
 	//Begin data parse
 	XMLSceneParser xmlScene;
 
-	SceneFile_Instancer *sceneFactory = new SceneFile_Instancer();
+	//SceneFile_Instancer *sceneFactory = new SceneFile_Instancer();
 
 	// register object creation function with xmlScene
-	xmlScene.registerCallback("camera", sceneFactory);
+	xmlScene.registerCallback("camera", this);
 	//xmlScene.registerCallback("light", sceneFactory); //TODO:Pulled for now, since lights haven't been implimented
 	//xmlScene.registerCallback("shader", sceneFactory); //TODO:Pulled for now, since shaders haven't been implimented
-	xmlScene.registerCallback("shape", sceneFactory);
+	xmlScene.registerCallback("shape", this);
 
 	if (args.inputFileName != "")
 		xmlScene.parseFile( args.inputFileName );
@@ -35,8 +32,8 @@ Scene::Scene(int argc, char *argv[])
 		std::cerr << "Need input file!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	
-	
+
+	xmlScene.parseFile( args.inputFileName );
 
 }
 
@@ -50,18 +47,19 @@ void Scene::genImage(){
 		{
 			pixelColor.set(bgColor);
 			dummyTMax = 1000;
-			/*sphere0*/.intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), dummyTMax, pixelColor);
+			shapeStack.top()->intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), dummyTMax, pixelColor);
+			shapeStack.pop();
 			imData[y][x] = png::rgb_pixel(pixelColor[0], pixelColor[1], pixelColor[2]);
 		}
 	}
-	if(args.outputFileName != "") imData.write( args.outputFileName );
-	else imData.write( "Untitled" );
+	imData.write(outputFileName);
+
 }
 
 
 
 
-void SceneFile_Instancer::instance( ptree::value_type const &v )
+void Scene::instance( ptree::value_type const &v )
 {
   std::istringstream buf;
 
@@ -92,6 +90,8 @@ void SceneFile_Instancer::instance( ptree::value_type const &v )
     else {
       spData.usesEnvMap = false;
     }
+
+	bgColor = spData.backgroundColor;
   }
 
   //
@@ -150,8 +150,8 @@ void SceneFile_Instancer::instance( ptree::value_type const &v )
         cam.type = perspective;
     else if (type == "orthographic")
         cam.type = orthographic;
-
-    // Instance the camera here!
+	Camera newCamera(type, cam.position, cam.gazeDirection, cam.focalLength, cam.imagePlaneWidth, sceneWidth, sceneHeight);
+	mainCamera = newCamera;
     std::cout << "Found Camera!" << std::endl;
   }
 
@@ -218,7 +218,7 @@ void SceneFile_Instancer::instance( ptree::value_type const &v )
   }
 }
 
-void SceneFile_Instancer::parseShapeData( ptree::value_type const &v )
+void Scene::parseShapeData( ptree::value_type const &v )
 {
   bool notInstance = true;
   if (v.first == "instance")
@@ -259,6 +259,8 @@ void SceneFile_Instancer::parseShapeData( ptree::value_type const &v )
     shape.radius = radius;
     shape.center = center;
     shape.shader = *shaderPtr;
+	Sphere newSphere(shape.center, shape.radius, shape.shader.kd_diffuse);
+	shapeStack.push(*newSphere);
 
     std::cout << "\tFound sphere!" << std::endl;
   }
@@ -280,7 +282,9 @@ void SceneFile_Instancer::parseShapeData( ptree::value_type const &v )
     shape.minPt = minPt;
     shape.maxPt = maxPt;
     shape.shader = *shaderPtr;
-
+	///////////////////////////
+	// Instance the box here
+	///////////////////////////
     std::cout << "\tFound box!" << std::endl;
   }
 
@@ -305,12 +309,14 @@ void SceneFile_Instancer::parseShapeData( ptree::value_type const &v )
     shape.v1 = v1;
     shape.v2 = v2;
     shape.shader = *shaderPtr;
-
+	///////////////////////////
+	// Instance the triangle here
+	///////////////////////////
     std::cout << "\tFound triangle!" << std::endl;
   }
 }
 
-shaderData* SceneFile_Instancer::parseShaderData( ptree::value_type const &v )
+shaderData* Scene::parseShaderData( ptree::value_type const &v )
 {
   std::string type, name;
   shaderData* shaderPtr_toReturn = 0;

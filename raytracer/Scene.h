@@ -10,9 +10,10 @@
 #include "handleGraphicsArgs.h"
 #include "Sphere.h"
 #include "XMLSceneParser.h"
-#include "SceneFile_Instancer.h"
+#include "SceneDataTypes.h"
 
 using namespace sivelab;
+using boost::property_tree::ptree;
 
 class Scene : public sivelab::SceneElementCreator {
 public:
@@ -24,7 +25,9 @@ private:
 	std::string outputFileName;
 	Vector3D bgColor;
 	Camera mainCamera;
-	std::stack<Shape> shapeStack;
+	std::stack<Shape*> shapeStack;
+	int sceneWidth;
+	int sceneHeight;
 
     void parseShapeData( ptree::value_type const &v );
     shaderData* parseShaderData( ptree::value_type const &v );
@@ -32,3 +35,5 @@ private:
     // std::map<std::string, Texture*> textureSources;
     std::map<std::string, shaderData*> shaderMap;
 };
+
+#endif

@@ -7,12 +7,12 @@ Camera::Camera() {
 }
 
 Camera::Camera(std::string inputType,
-				   Vector3D inputPosition,
-				   Vector3D inputDirection,
-				   float inputFocalLength,
-				   float inputImagePlaneWidth,
-				   int inputPixelWidth,
-				   int inputPixelHeight) {
+			   Vector3D inputPosition,
+			   Vector3D inputDirection,
+			   float inputFocalLength,
+			   float inputImagePlaneWidth,
+			   int inputPixelWidth,
+			   int inputPixelHeight) {
 	//Set camera type
 	if(inputType == "perspective") mainData.type = perspective;
 	else if(inputType == "orthographic") mainData.type = orthographic;
