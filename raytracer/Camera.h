@@ -38,6 +38,7 @@ protected:
 		float focalLength, imagePlaneWidth;
 		int pixelWidth, pixelHeight;
 	};
+	float l, b, t, r, u, v; //Left, bottom, right, top, U-scalar, V-scalar
 	cameraData mainData;
 	void calculateOrthonormalBasis(); //Used only in constructor to set U,V,W
 };

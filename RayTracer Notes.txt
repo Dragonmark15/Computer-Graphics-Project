@@ -41,4 +41,4 @@ float u = l + (r-l) (xPixel+0.5)/imagePixelWidth
 float v = b + (t-b) (yPixel+0.5)/imagePixelHeight
 
 Origin = XML camera origin
-Direction = ([-(focalLength) * W] , [u * U] , [v * V])
+Direction = ([-(focalLength) * W] + [u * U] + [v * V])
