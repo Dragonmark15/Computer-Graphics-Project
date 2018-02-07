@@ -23,3 +23,22 @@ Triangle
 Camera is passed in the screen data to determine vector direction
 Camera calls a double for-loop to pass in each object per pixel
 Each pixel calls the intersect on each object in the scene
+
+
+
+W = -(focalLength) * viewDirection
+W.normalize
+t = Vector3D(0,1,0) //For now, this is ok. Not always ok
+U = t.cross(W)
+U.normalize
+V = W.cross(U)
+V.normalize
+
+l = b = -iPW / 2
+t = r = iPW / 2
+
+float u = l + (r-l) (xPixel+0.5)/imagePixelWidth
+float v = b + (t-b) (yPixel+0.5)/imagePixelHeight
+
+Origin = XML camera origin
+Direction = ([-(focalLength) * W] , [u * U] , [v * V])

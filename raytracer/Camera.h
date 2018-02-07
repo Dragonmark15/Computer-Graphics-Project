@@ -32,11 +32,14 @@ protected:
 		CamType type;
 		Vector3D position;
 		Vector3D direction;
+		Vector3D U;
+		Vector3D V;
+		Vector3D W;
 		float focalLength, imagePlaneWidth;
 		int pixelWidth, pixelHeight;
 	};
 	cameraData mainData;
-
+	void calculateOrthonormalBasis(); //Used only in constructor to set U,V,W
 };
 
 #endif

@@ -29,7 +29,16 @@ Camera::~Camera() {
 
 }
 
-//Currently only works for perspective
+void calculateOrthonormalBasis() {
+	Vector3D t(0,1,0);
+	W = mainData.Direction * -(mainData.focalLength);
+	W.normalize();
+	U = t.cross(W);
+	U.normalize();
+	V = W.cross(U);
+	V.normalize();
+}
+
 Vector3D Camera::genRay(int x, int y) { //x,y ranges from [0,pixelWidth] or [0,pixelHeight]
 	//convert integers to a number between 0 and pixelWidth or pixelheight
 	Vector3D returnVector;

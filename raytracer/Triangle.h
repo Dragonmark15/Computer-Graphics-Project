@@ -18,8 +18,9 @@ public:
 	virtual void intersect(const Vector3D origin, const Vector3D direction, float tMin, float &tMax, HitStructure &h);
 	virtual bool intersect(const Vector3D origin, const Vector3D direction);
 	*/
-protected:
+private:
 	Vector3D v0, v1, v2;
+	Vector3D barCoordinates(Vector3D vectorIn):
 
 //tValue calculateT(const Vector3D origin, const Vector3D direction);
 /*	struct HitStructure {
