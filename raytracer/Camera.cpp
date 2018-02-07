@@ -41,13 +41,15 @@ void Camera::calculateOrthonormalBasis() {
 	Vector3D t(0,1,0);
 	mainData.W = mainData.direction * mainData.focalLength * -1;
 	mainData.W.normalize();
-	std::cout << "W: " << mainData.W[0] << "," << mainData.W[1] << "," << mainData.W[2] << std::endl;
 	mainData.U = t.cross(mainData.W);
 	mainData.U.normalize();
-	std::cout << "U: " << mainData.U[0] << "," << mainData.U[1] << "," << mainData.U[2] << std::endl;
 	mainData.V = mainData.W.cross(mainData.U);
 	mainData.V.normalize();
-	std::cout << "V: " << mainData.V[0] << "," << mainData.V[1] << "," << mainData.V[2] << std::endl;
+	//Check for right hand rule
+	Vector3D testVector = mainData.V.cross(mainData.U);
+	if(testVector[0] != mainData.W[0] || testVector[1] != mainData.W[1] || testVector[2] != mainData.W[2]) {
+		mainData.V *= -1;
+	}
 }
 
 Vector3D Camera::genRay(int x, int y) {
