@@ -9,6 +9,7 @@
 #include "png++/png.hpp"
 #include "handleGraphicsArgs.h"
 #include "Sphere.h"
+#include "Triangle.h"
 #include "XMLSceneParser.h"
 #include "SceneDataTypes.h"
 
@@ -26,6 +27,7 @@ private:
 	Vector3D bgColor;
 	Camera mainCamera;
 	std::deque<Sphere> sphereDeque;
+	std::deque<Triangle> triangleDeque;
 	int sceneWidth;
 	int sceneHeight;
 

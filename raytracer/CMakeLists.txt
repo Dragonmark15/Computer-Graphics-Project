@@ -5,6 +5,7 @@ add_library(raytracer
 	Camera.cpp Camera.h
 	Shape.h
 	Sphere.cpp Sphere.h
+	Triangle.cpp Triangle.h
 	Scene.cpp Scene.h
 	SceneDataTypes.h
 )

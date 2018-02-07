@@ -1,8 +1,5 @@
 #include "Scene.h"
 
-//////////////////////////////////
-//TODO: Add new file with main()//
-//////////////////////////////////
 Scene::Scene(int argc, char *argv[])
 {
 	GraphicsArgs args;
@@ -46,9 +43,15 @@ void Scene::genImage(){
 		{
 			tMax = 1000000;
 			pixelColor.set(bgColor);
+			//Iterate through spheres
 			for(int i = 0; i < sphereDeque.size(); i++)
 			{
 				sphereDeque[i].intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), tMax, pixelColor);
+			}
+			//Iterate through triangles
+			for(int i = 0; i < triangleDeque.size(); i++)
+			{
+				triangleDeque[i].intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), tMax, pixelColor);
 			}
 			imData[y][x] = png::rgb_pixel(pixelColor[0], pixelColor[1], pixelColor[2]);
 		}
@@ -311,9 +314,9 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.v1 = v1;
     shape.v2 = v2;
     shape.shader = *shaderPtr;
-	///////////////////////////
-	// Instance the triangle here
-	///////////////////////////
+	Triangle newTriangle(shape.v0, shape.v1, shape.v2, (shape.shader.kd_diffuse * 255));
+	triangleDeque.push_back(newTriangle);
+
     std::cout << "\tFound triangle!" << std::endl;
   }
 }

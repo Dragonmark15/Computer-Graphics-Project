@@ -1,5 +1,5 @@
-#ifndef __SPHERE_H__
-#define __SPHERE_H__
+#ifndef __TRIANGLE_H__
+#define __TRIANGLE_H__
 
 //#include <string>
 
@@ -14,13 +14,15 @@ public:
 	void intersect(const Vector3D origin, const Vector3D direction, float tMin, float &tMax, Vector3D &inputColor);
 	bool intersect(const Vector3D origin, const Vector3D direction);
 	Vector3D getColor() {return color;}
+	Vector3D getNormal() {return normal;}
 	/*
 	virtual void intersect(const Vector3D origin, const Vector3D direction, float tMin, float &tMax, HitStructure &h);
 	virtual bool intersect(const Vector3D origin, const Vector3D direction);
 	*/
 private:
 	Vector3D v0, v1, v2, normal;
-	Vector3D barCoordinates(Vector3D vectorIn):
+	Vector3D barCoordinates(const Vector3D vectorIn);
+	float calculateT(const Vector3D origin, const Vector3D direction, const Vector3D barCoordinates);
 
 //tValue calculateT(const Vector3D origin, const Vector3D direction);
 /*	struct HitStructure {
