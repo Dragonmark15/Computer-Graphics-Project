@@ -66,3 +66,9 @@ tValue Sphere::calculateT(const Vector3D origin, const Vector3D direction) {
 	}
 	return returnValue;
 }
+
+Vector3D Sphere::calculateNormal() {
+	
+
+
+}
