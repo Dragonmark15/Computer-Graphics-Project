@@ -1,8 +1,6 @@
 #ifndef __SPHERE_H__
 #define __SPHERE_H__
 
-//#include <string>
-
 #include "Vector3D.h"
 #include "Shape.h"
 
@@ -27,7 +25,7 @@ private:
 	float radius;
 	Vector3D calculateNormal();
 
-tValue calculateT(const Vector3D origin, const Vector3D direction);
+	tValue calculateT(const Vector3D origin, const Vector3D direction);
 /*	struct HitStructure {
 		Vector3D color;
 		Vector3D surfaceNormal;

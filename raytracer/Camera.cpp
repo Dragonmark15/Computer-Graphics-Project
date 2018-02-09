@@ -1,4 +1,5 @@
 #include <string>
+//#include <iostream>
 
 #include "Camera.h"
 
@@ -23,21 +24,41 @@ Camera::Camera(std::string inputType,
 	mainData.imagePlaneWidth = inputImagePlaneWidth;
 	mainData.pixelWidth = inputPixelWidth;
 	mainData.pixelHeight = inputPixelHeight;
+	//Set U,V,W
+	calculateOrthonormalBasis();
+	//Set image plane data
+	l = -(mainData.imagePlaneWidth / 2);
+	b = l;
+	t = mainData.imagePlaneWidth / 2;
+	r = t;
 }
 
 Camera::~Camera() {
 
 }
 
-void calculateOrthonormalBasis() {
+void Camera::calculateOrthonormalBasis() {
 	Vector3D t(0,1,0);
-	W = mainData.Direction * -(mainData.focalLength);
-	W.normalize();
-	U = t.cross(W);
-	U.normalize();
-	V = W.cross(U);
-	V.normalize();
+	mainData.W = mainData.direction * mainData.focalLength * -1;
+	mainData.W.normalize();
+	mainData.U = t.cross(mainData.W);
+	mainData.U.normalize();
+	mainData.V = mainData.W.cross(mainData.U);
+	mainData.V.normalize();
+	//Check for right hand rule
+	Vector3D testVector = mainData.V.cross(mainData.U);
+	if(testVector[0] != mainData.W[0] || testVector[1] != mainData.W[1] || testVector[2] != mainData.W[2]) {
+		mainData.V *= -1;
+	}
 }
+
+Vector3D Camera::genRay(int x, int y) {
+	float u=l+(r-l)*(x+0.5)/mainData.pixelWidth;
+	float v=b+(t-b)*(y+0.5)/mainData.pixelHeight;
+	return ( ((-1 * mainData.focalLength) * mainData.W) + (u * mainData.U) + (v * mainData.V) );
+}
+
+/*
 
 Vector3D Camera::genRay(int x, int y) { //x,y ranges from [0,pixelWidth] or [0,pixelHeight]
 	//convert integers to a number between 0 and pixelWidth or pixelheight
@@ -61,7 +82,7 @@ Vector3D Camera::genRay(int x, int y) { //x,y ranges from [0,pixelWidth] or [0,p
 	return returnVector;
 }
 
-
+*/
 
 
 
