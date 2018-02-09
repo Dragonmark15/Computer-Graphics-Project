@@ -46,11 +46,14 @@ void Scene::genImage(){
 		{
 			tMax = 1000000;
 			inputHit.color.set(bgColor);
+			rayIn.origin = mainCamera.getPosition();
+			rayIn.direction = mainCamera.genRay(x,y);
 			//Iterate through spheres
+///////////////////////////////////////
+std::cout << "X= " << x << " Y= " << y <<std::endl;
+///////////////////////////////////////
 			for(int i = 0; i < sphereDeque.size(); i++)
 			{
-				rayIn.origin = mainCamera.getPosition();
-				rayIn.direction = mainCamera.genRay(x,y);
 				sphereDeque[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
 			//Iterate through triangles
