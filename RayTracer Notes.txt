@@ -42,3 +42,28 @@ float v = b + (t-b) (yPixel+0.5)/imagePixelHeight
 
 Origin = XML camera origin
 Direction = ([-(focalLength) * W] + [u * U] + [v * V])
+
+
+class PointLightSource:Light
+	For all pixels(i,j)
+	Ray R=cam->genRay(i,j)
+	if(hit)
+	.
+	.
+	.
+
+struct HitStructure {
+	
+}
+
+class Shader
+	virtual apply(&HitStructure)
+
+Class Lambertian:shader
+	apply(&HitStructure) //Must be a cos (angle)
+	//Diffuse and Ambient = Material properties
+	//Diffuse = reflected color
+	light = (point - lightSource).normalize()
+	color = normal.dot(light) * kd //kd = coefficient of diffused color
+	max(n.dot(l) or 0) // Prevent shading underneath the object
+Class NormalShader:Shader
