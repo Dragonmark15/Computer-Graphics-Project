@@ -2,6 +2,8 @@
 
 Scene::Scene(int argc, char *argv[])
 {
+	useNormalForColor = false;//Set to true to test normals
+
 	GraphicsArgs args;
  	args.process(argc, argv);
 	
@@ -35,33 +37,33 @@ Scene::Scene(int argc, char *argv[])
 
 void Scene::genImage(){
 	png::image< png::rgb_pixel > imData( mainCamera.getPixelWidth(), mainCamera.getPixelHeight() );
-	Vector3D pixelColor;
 	float tMax;
+	Ray rayIn;
+	HitStructure inputHit;
 	for (size_t y = 0; y < imData.get_height(); ++y)
 	{
 		for (size_t x = 0; x < imData.get_width(); ++x)
 		{
 			tMax = 1000000;
-			pixelColor.set(bgColor);
+			inputHit.color.set(bgColor);
 			//Iterate through spheres
 			for(int i = 0; i < sphereDeque.size(); i++)
 			{
-				sphereDeque[i].intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), tMax, pixelColor);
+				rayIn.origin = mainCamera.getPosition();
+				rayIn.direction = mainCamera.genRay(x,y);
+				sphereDeque[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
 			//Iterate through triangles
 			for(int i = 0; i < triangleDeque.size(); i++)
 			{
-				triangleDeque[i].intersect(mainCamera.getPosition(),mainCamera.genRay(x,y), mainCamera.getFocalLength(), tMax, pixelColor);
+				triangleDeque[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
-			imData[y][x] = png::rgb_pixel(pixelColor[0], pixelColor[1], pixelColor[2]);
+			if(useNormalForColor) imData[y][x] = png::rgb_pixel(inputHit.normal[0]*255, inputHit.normal[1]*255, inputHit.normal[2]*255);
+			else imData[y][x] = png::rgb_pixel(inputHit.color[0], inputHit.color[1], inputHit.color[2]);
 		}
 	}
 	imData.write(outputFileName);
-
 }
-
-
-
 
 void Scene::instance( ptree::value_type const &v )
 {

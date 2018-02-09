@@ -8,6 +8,7 @@ add_library(raytracer
 	Triangle.cpp Triangle.h
 	Scene.cpp Scene.h
 	SceneDataTypes.h
+	RaytracerClasses.h
 )
 
 add_executable(Ray_Tracer

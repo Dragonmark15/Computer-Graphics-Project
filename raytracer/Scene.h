@@ -8,6 +8,7 @@
 #include "Camera.h"
 #include "png++/png.hpp"
 #include "handleGraphicsArgs.h"
+#include "RaytracerClasses.h"
 #include "Sphere.h"
 #include "Triangle.h"
 #include "XMLSceneParser.h"
@@ -20,7 +21,7 @@ class Scene : public sivelab::SceneElementCreator {
 public:
 	Scene(int argc, char *argv[]);
 	void genImage();
-
+	bool useNormalForColor;
 	void instance( ptree::value_type const &v ); 
 private:
 	std::string outputFileName;
