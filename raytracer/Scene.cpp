@@ -49,9 +49,6 @@ void Scene::genImage(){
 			rayIn.origin = mainCamera.getPosition();
 			rayIn.direction = mainCamera.genRay(x,y);
 			//Iterate through spheres
-///////////////////////////////////////
-std::cout << "X= " << x << " Y= " << y <<std::endl;
-///////////////////////////////////////
 			for(int i = 0; i < sphereDeque.size(); i++)
 			{
 				sphereDeque[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);

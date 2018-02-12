@@ -18,10 +18,10 @@ public:
 	bool intersect(const Ray rayIn);
 
 private:
-	Vector3D v0, v1, v2, normal;
-	Vector3D barCoordinates(const Ray rayIn);
-	float calculateT(const Ray rayIn, const Vector3D barCoordinates);
-
+	Vector3D v0, v1, v2;
+	//Vector3D barCoordinates(const Ray rayIn);
+	float calculateT(const Ray rayIn);
+	float triangleArea(const Vector3D a, const Vector3D b, const Vector3D c);
 };
 
 #endif

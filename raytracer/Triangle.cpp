@@ -47,6 +47,55 @@ bool Triangle::intersect(const Vector3D origin, const Vector3D direction) {
 */
 
 void Triangle::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &inputHit) {
+	float t = calculateT(rayIn);
+	if (t > tMin && t < tMax) {
+		tMax = t;
+		inputHit = hit;
+	}
+}
+
+bool Triangle::intersect(const Ray rayIn) {
+	return (calculateT(rayIn) != 0);
+}
+
+float Triangle::calculateT(const Ray rayIn) {
+	float t; //If T is returned as 0, it doesn't intersect with the triangle
+	float distFromZero = hit.normal.dot(v0);
+	float tDenominator = hit.normal.dot(rayIn.direction);
+	if(tDenominator > -0.000001 && tDenominator < 0.000001) t = 0; //Zero test. If equal to zero, triangle is perpendicular to the ray
+	else {
+		//Calculate T
+		float tNumerator = hit.normal.dot(rayIn.origin) + distFromZero;
+		float t = (-1 * tNumerator) / (-1 * tDenominator); //TODO: Change this to be negative only when the normal faces the camera. For oneTriangle and threeTriangle, this works fine for now
+		//Determine in p(t) is in the triangle
+		Vector3D P = rayIn.origin + (t * rayIn.direction); //The point on the plane and the ray
+		//Calculate barycentric coordinates using triangle area method
+		float areaAll = triangleArea(v0,v1,v2);
+		float areaA = triangleArea(v2,v0,P);
+		float areaB = triangleArea(v0,v1,P);
+		float areaC = triangleArea(v1,v2,P);
+		
+		float alpha = areaA/areaAll;
+		float beta = areaB/areaAll;
+		float gamma = areaC/areaAll;
+
+		if ((alpha+beta+gamma) > 0.99999 && (alpha+beta+gamma) < 1.00001 &&
+			alpha > 0 && alpha < 1 &&
+			beta > 0 && beta < 1 &&
+			gamma > 0 && gamma < 1) {}
+		else t = 0;
+		return t;
+		
+	} 
+}
+
+float Triangle::triangleArea(const Vector3D a, const Vector3D b, const Vector3D c) {
+	Vector3D u = b - a;
+	Vector3D v = c - a;
+	return (float)(0.5 * u.cross(v).length());
+}
+/*
+void Triangle::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &inputHit) {
 	Vector3D Coordinates = barCoordinates(rayIn);
 	if(Coordinates[0] > tMin && Coordinates[0] < tMax && //t is between tMin and tMax
 	   Coordinates[2] > 0 && Coordinates[2] < 1 && //gamma test
@@ -57,13 +106,12 @@ void Triangle::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure 
 	} 
 	else {
 
-		/*
-		float t = calculateT(rayIn, Coordinates);
-		std::cout << "T: " << t << std::endl;
-		if(t > tMin && t < tMax && t != 0) {
-			tMax = t;
-			inputHit = hit;
-		}*/
+		//float t = calculateT(rayIn, Coordinates);
+		//std::cout << "T: " << t << std::endl;
+		//if(t > tMin && t < tMax && t != 0) {
+		//	tMax = t;
+		//	inputHit = hit;
+		}
 	}
 }
 
@@ -84,7 +132,7 @@ float Triangle::calculateT(const Ray rayIn, const Vector3D barCoordinates) {
 	float t = (rhs-rayIn.origin)[0] / rayIn.direction[0];
 	if(rayIn.direction[1]*t != rhs[1] || rayIn.direction[2]*t != rhs[2]) t = 0;
 	return t;
-}
+}*/
 /*
 float Triangle::calculateT(const Vector3D origin, const Vector3D direction, const Vector3D barCoordinates) {
 	//origin + t(direction) = v0 + beta(v1-v0) + gamma(v2-v0)
@@ -112,7 +160,7 @@ Vector3D Triangle::barCoordinates(const Vector3D vectorIn) {
 	return returnVector;
 }
 */
-
+/*
 Vector3D Triangle::barCoordinates(const Ray rayIn) {
 	float a,b,c,d,e,f,g,h,i,j,k,l,beta,gamma,t; //Based on the matrix in the textbook, pg79
 	a = v0[0]-v1[0];
@@ -140,4 +188,5 @@ Vector3D Triangle::barCoordinates(const Ray rayIn) {
 	Vector3D returnVector(t,beta,gamma);
 	return returnVector;
 }
+*/
 
