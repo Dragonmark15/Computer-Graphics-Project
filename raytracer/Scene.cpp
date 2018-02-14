@@ -49,14 +49,14 @@ void Scene::genImage(){
 			rayIn.origin = mainCamera.getPosition();
 			rayIn.direction = mainCamera.genRay(x,y);
 			//Iterate through spheres
-			for(int i = 0; i < sphereDeque.size(); i++)
+			for(int i = 0; i < sphereVector.size(); i++)
 			{
-				sphereDeque[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
+				sphereVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
 			//Iterate through triangles
-			for(int i = 0; i < triangleDeque.size(); i++)
+			for(int i = 0; i < triangleVector.size(); i++)
 			{
-				triangleDeque[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
+				triangleVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
 			if(useNormalForColor) imData[y][x] = png::rgb_pixel(inputHit.normal[0]*255, inputHit.normal[1]*255, inputHit.normal[2]*255);
 			else imData[y][x] = png::rgb_pixel(inputHit.color[0], inputHit.color[1], inputHit.color[2]);
@@ -267,7 +267,7 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.center = center;
     shape.shader = *shaderPtr;
 	Sphere newSphere(shape.center, shape.radius, (shape.shader.kd_diffuse * 255));
-	sphereDeque.push_back(newSphere);
+	sphereVector.push_back(newSphere);
 
     std::cout << "\tFound sphere!" << std::endl;
   }
@@ -289,9 +289,8 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.minPt = minPt;
     shape.maxPt = maxPt;
     shape.shader = *shaderPtr;
-	///////////////////////////
-	// Instance the box here
-	///////////////////////////
+	Box newBox(shape.minPt, shape.maxPt, (shape.shader.kd_diffuse * 255));
+	boxVector.push_back(newBox);
     std::cout << "\tFound box!" << std::endl;
   }
 
@@ -317,7 +316,7 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.v2 = v2;
     shape.shader = *shaderPtr;
 	Triangle newTriangle(shape.v0, shape.v1, shape.v2, (shape.shader.kd_diffuse * 255));
-	triangleDeque.push_back(newTriangle);
+	triangleVector.push_back(newTriangle);
 
     std::cout << "\tFound triangle!" << std::endl;
   }

@@ -2,7 +2,7 @@
 #define __SCENE_H__
 
 #include <string>
-#include <deque>
+#include <vector>
 
 #include "Vector3D.h"
 #include "Camera.h"
@@ -11,6 +11,7 @@
 #include "RaytracerClasses.h"
 #include "Sphere.h"
 #include "Triangle.h"
+#include "Box.h"
 #include "XMLSceneParser.h"
 #include "SceneDataTypes.h"
 
@@ -27,8 +28,9 @@ private:
 	std::string outputFileName;
 	Vector3D bgColor;
 	Camera mainCamera;
-	std::deque<Sphere> sphereDeque;
-	std::deque<Triangle> triangleDeque;
+	std::vector<Sphere> sphereVector;
+	std::vector<Triangle> triangleVector;
+	std::vector<Box> boxVector;
 	int sceneWidth;
 	int sceneHeight;
 
