@@ -58,6 +58,10 @@ void Scene::genImage(){
 			{
 				triangleVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
+			for (int i = 0; i < boxVector.size(); i++)
+			{
+				boxVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
+			}
 			if(useNormalForColor) imData[y][x] = png::rgb_pixel(inputHit.normal[0]*255, inputHit.normal[1]*255, inputHit.normal[2]*255);
 			else imData[y][x] = png::rgb_pixel(inputHit.color[0], inputHit.color[1], inputHit.color[2]);
 		}
