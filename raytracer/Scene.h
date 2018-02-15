@@ -11,7 +11,7 @@
 #include "RaytracerClasses.h"
 #include "Sphere.h"
 #include "Triangle.h"
-//#include "Box.h"
+#include "Box.h"
 #include "XMLSceneParser.h"
 #include "SceneDataTypes.h"
 
@@ -30,7 +30,7 @@ private:
 	Camera mainCamera;
 	std::vector<Sphere> sphereVector;
 	std::vector<Triangle> triangleVector;
-//	std::vector<Box> boxVector;
+	std::vector<Box> boxVector;
 	int sceneWidth;
 	int sceneHeight;
 

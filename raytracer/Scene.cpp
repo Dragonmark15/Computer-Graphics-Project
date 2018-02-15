@@ -63,10 +63,11 @@ void Scene::genImage(){
 			{
 				triangleVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
-			/*for (int i = 0; i < boxVector.size(); i++)
+			//Iterate through boxes
+			for (int i = 0; i < boxVector.size(); i++)
 			{
 				boxVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
-			}*/
+			}
 			if(useNormalForColor) imData[y][x] = png::rgb_pixel(inputHit.normal[0]*255, inputHit.normal[1]*255, inputHit.normal[2]*255);
 			else imData[y][x] = png::rgb_pixel(inputHit.color[0], inputHit.color[1], inputHit.color[2]);
 		}
@@ -298,8 +299,8 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.minPt = minPt;
     shape.maxPt = maxPt;
     shape.shader = *shaderPtr;
-	/*Box newBox(shape.minPt, shape.maxPt, (shape.shader.kd_diffuse * 255));
-	boxVector.push_back(newBox);*/
+	Box newBox(shape.minPt, shape.maxPt, (shape.shader.kd_diffuse * 255));
+	boxVector.push_back(newBox);
     std::cout << "\tFound box!" << std::endl;
   }
 
