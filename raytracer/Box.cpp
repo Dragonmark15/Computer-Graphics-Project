@@ -41,21 +41,21 @@ void Box::calculateBoxTriangles() {
 
 	//Create the triangles. The sides listed don't matter, only used as a reference
 	//Top of triangle
-	boxTriangles.push_back(Triangle(C,B,A,hit.color));
-	boxTriangles.push_back(Triangle(C,D,B,hit.color));
+	boxTriangles.push_back(Triangle(C,B,A,hit.color)); //Triangle 0
+	boxTriangles.push_back(Triangle(C,D,B,hit.color)); //Triangle 1
 	//Back
-	boxTriangles.push_back(Triangle(E,B,A,hit.color));
-	boxTriangles.push_back(Triangle(E,F,B,hit.color));
+	boxTriangles.push_back(Triangle(E,B,A,hit.color)); //Triangle 2
+	boxTriangles.push_back(Triangle(E,F,B,hit.color)); //Triangle 3
 	//Left
-	boxTriangles.push_back(Triangle(G,E,A,hit.color));
-	boxTriangles.push_back(Triangle(G,A,C,hit.color));
+	boxTriangles.push_back(Triangle(G,E,A,hit.color)); //Triangle 4
+	boxTriangles.push_back(Triangle(G,A,C,hit.color)); //Triangle 5
 	//Right
-	boxTriangles.push_back(Triangle(H,F,B,hit.color));
-	boxTriangles.push_back(Triangle(H,B,D,hit.color));
+	boxTriangles.push_back(Triangle(H,F,B,hit.color)); //Triangle 6
+	boxTriangles.push_back(Triangle(H,B,D,hit.color)); //Triangle 7
 	//Front
-	boxTriangles.push_back(Triangle(G,D,C,hit.color));
-	boxTriangles.push_back(Triangle(G,H,D,hit.color));
+	boxTriangles.push_back(Triangle(G,D,C,hit.color)); //Triangle 8
+	boxTriangles.push_back(Triangle(G,H,D,hit.color)); //Triangle 9
 	//Bottom
-	boxTriangles.push_back(Triangle(G,F,E,hit.color));
-	boxTriangles.push_back(Triangle(G,H,F,hit.color));
+	boxTriangles.push_back(Triangle(G,F,E,hit.color)); //Triangle 10
+	boxTriangles.push_back(Triangle(G,H,F,hit.color)); //Triangle 11
 }

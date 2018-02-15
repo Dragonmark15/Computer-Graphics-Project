@@ -6,6 +6,7 @@ Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2) {
 	v2 = inputv2;
 	hit.color.set(100,100,100);
 	hit.normal = (v1 - v0).cross(v2 - v0);
+	hit.normal.normalize();
 }
 
 Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Vector3D inputColor) {
@@ -14,6 +15,7 @@ Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Vector3
 	v2 = inputv2;
 	hit.color = inputColor;
 	hit.normal = (v1 - v0).cross(v2 - v0);
+	hit.normal.normalize();
 }
 
 void Triangle::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &inputHit) {
@@ -36,7 +38,7 @@ float Triangle::calculateT(const Ray rayIn) {
 	else {
 		//Calculate T
 		float tNumerator = hit.normal.dot(rayIn.origin) + distFromZero;
-		float t = (-1 * tNumerator) / (-1 * tDenominator); //TODO: Change this to be negative only when the normal faces the camera. For oneTriangle and threeTriangle, this works fine for now
+		float t = tNumerator / tDenominator;
 		//Determine in p(t) is in the triangle
 		Vector3D P = rayIn.origin + (t * rayIn.direction); //The point on the plane and the ray
 		//Calculate barycentric coordinates using triangle area method
