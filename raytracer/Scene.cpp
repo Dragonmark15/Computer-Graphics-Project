@@ -1,3 +1,4 @@
+#include <math.h>
 #include "Scene.h"
 ////////////////std::cout statement for vectors/////////////////////
 //std::cout << "Normal: (" << inputHit.normal[0] << "," << inputHit.normal[1] << "," << inputHit.normal[2] << ")" << std::endl;
@@ -16,7 +17,7 @@ Scene::Scene(int argc, char *argv[])
 	else outputFileName = "Untitled";
 	sceneWidth = args.width;
 	sceneHeight = args.height;
-	bgColor.set(0,0,0);	//Set a default value, in case XML doesn't specify
+	bgColor.set(0.25,0.25,0.25);	//Set a default value, in case XML doesn't specify
 
 	//Begin data parse
 	XMLSceneParser xmlScene;
@@ -25,8 +26,8 @@ Scene::Scene(int argc, char *argv[])
 
 	// register object creation function with xmlScene
 	xmlScene.registerCallback("camera", this);
-	xmlScene.registerCallback("light", this); //TODO:Pulled for now, since lights haven't been implimented
-	xmlScene.registerCallback("shader", this); //TODO:Pulled for now, since shaders haven't been implimented
+	xmlScene.registerCallback("light", this);
+	xmlScene.registerCallback("shader", this);
 	xmlScene.registerCallback("shape", this);
 
 	if (args.inputFileName != "")
@@ -48,8 +49,9 @@ void Scene::genImage(){
 	{
 		for (size_t x = 0; x < imData.get_width(); ++x)
 		{
+			
 			tMax = 1000000;
-			inputHit.color.set(bgColor);
+			inputHit.shader.set(bgColor);
 			inputHit.normal.set(0,0,0);
 			rayIn.origin = mainCamera.getPosition();
 			rayIn.direction = mainCamera.genRay(x,y);
@@ -68,8 +70,12 @@ void Scene::genImage(){
 			{
 				boxVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
+			//std::cout << "Input hit Shader: " << inputHit.shader.getDiffuse() << std::endl;
+			//std::cout << "Normal: " << inputHit.normal << std::endl;
+			Vector3D finalColor = inputHit.shader.apply(inputHit.normal, inputHit.point, lightVector);
+			//std::cout << "Final color: " << finalColor << std::endl;
 			if(useNormalForColor) imData[y][x] = png::rgb_pixel(inputHit.normal[0]*255, inputHit.normal[1]*255, inputHit.normal[2]*255);
-			else imData[y][x] = png::rgb_pixel(inputHit.color[0], inputHit.color[1], inputHit.color[2]);
+			else imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
 		}
 	}
 	imData.write(outputFileName);
@@ -197,6 +203,9 @@ void Scene::instance( ptree::value_type const &v )
 
     if (type == "point") {
         ldata.type = point;
+		Light newLight(ldata.position, ldata.intensity);
+		lightVector.push_back(newLight);
+		std::cout << "\tFound Light!" << std::endl;
     }
     else if (type == "area") {
 
@@ -276,7 +285,9 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.radius = radius;
     shape.center = center;
     shape.shader = *shaderPtr;
-	Sphere newSphere(shape.center, shape.radius, (shape.shader.kd_diffuse * 255));
+	
+	Shader newShader(shape.shader.kd_diffuse);
+	Sphere newSphere(shape.center, shape.radius, newShader);
 	sphereVector.push_back(newSphere);
 
     std::cout << "\tFound sphere!" << std::endl;
@@ -299,7 +310,9 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.minPt = minPt;
     shape.maxPt = maxPt;
     shape.shader = *shaderPtr;
-	Box newBox(shape.minPt, shape.maxPt, (shape.shader.kd_diffuse * 255));
+
+	Shader newShader(shape.shader.kd_diffuse);
+	Box newBox(shape.minPt, shape.maxPt, newShader);
 	boxVector.push_back(newBox);
     std::cout << "\tFound box!" << std::endl;
   }
@@ -325,7 +338,9 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.v1 = v1;
     shape.v2 = v2;
     shape.shader = *shaderPtr;
-	Triangle newTriangle(shape.v0, shape.v1, shape.v2, (shape.shader.kd_diffuse * 255));
+
+	Shader newShader(shape.shader.kd_diffuse);
+	Triangle newTriangle(shape.v0, shape.v1, shape.v2, newShader);
 	triangleVector.push_back(newTriangle);
 
     std::cout << "\tFound triangle!" << std::endl;

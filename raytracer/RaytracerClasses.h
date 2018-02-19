@@ -2,6 +2,7 @@
 #define __RAYTRACERCLASSES_H__
 
 #include "Vector3D.h"
+#include "Shader.h"
 
 using namespace sivelab;
 
@@ -11,9 +12,9 @@ struct Ray {
 };
 
 struct HitStructure {
-	Vector3D color;
-	//shader
+	Shader shader;
 	Vector3D normal;
+	Vector3D point;
 };
 
 #endif

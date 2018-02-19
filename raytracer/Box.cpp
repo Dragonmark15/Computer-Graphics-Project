@@ -3,14 +3,16 @@
 Box::Box(Vector3D inputMinPt, Vector3D inputMaxPt) {
 	minPt = inputMinPt;
 	maxPt = inputMaxPt;
-	hit.color.set(100,100,100);
+	Vector3D tempVector(100,100,100);
+	Shader defaultShader(tempVector);
+	hit.shader = defaultShader;
 	calculateBoxTriangles();
 }
 
-Box::Box(Vector3D inputMinPt, Vector3D inputMaxPt, Vector3D inputColor) {
+Box::Box(Vector3D inputMinPt, Vector3D inputMaxPt, Shader inputShader) {
 	minPt = inputMinPt;
 	maxPt = inputMaxPt;
-	hit.color = inputColor;
+	hit.shader = inputShader;
 	calculateBoxTriangles();
 }
 
@@ -41,21 +43,21 @@ void Box::calculateBoxTriangles() {
 
 	//Create the triangles. The sides listed don't matter, only used as a reference
 	//Top of triangle
-	boxTriangles.push_back(Triangle(C,B,A,hit.color)); //Triangle 0
-	boxTriangles.push_back(Triangle(C,D,B,hit.color)); //Triangle 1
+	boxTriangles.push_back(Triangle(C,B,A,hit.shader)); //Triangle 0
+	boxTriangles.push_back(Triangle(C,D,B,hit.shader)); //Triangle 1
 	//Back
-	boxTriangles.push_back(Triangle(E,B,A,hit.color)); //Triangle 2
-	boxTriangles.push_back(Triangle(E,F,B,hit.color)); //Triangle 3
+	boxTriangles.push_back(Triangle(E,B,A,hit.shader)); //Triangle 2
+	boxTriangles.push_back(Triangle(E,F,B,hit.shader)); //Triangle 3
 	//Left
-	boxTriangles.push_back(Triangle(G,E,A,hit.color)); //Triangle 4
-	boxTriangles.push_back(Triangle(G,A,C,hit.color)); //Triangle 5
+	boxTriangles.push_back(Triangle(G,E,A,hit.shader)); //Triangle 4
+	boxTriangles.push_back(Triangle(G,A,C,hit.shader)); //Triangle 5
 	//Right
-	boxTriangles.push_back(Triangle(H,F,B,hit.color)); //Triangle 6
-	boxTriangles.push_back(Triangle(H,B,D,hit.color)); //Triangle 7
+	boxTriangles.push_back(Triangle(H,F,B,hit.shader)); //Triangle 6
+	boxTriangles.push_back(Triangle(H,B,D,hit.shader)); //Triangle 7
 	//Front
-	boxTriangles.push_back(Triangle(G,D,C,hit.color)); //Triangle 8
-	boxTriangles.push_back(Triangle(G,H,D,hit.color)); //Triangle 9
+	boxTriangles.push_back(Triangle(G,D,C,hit.shader)); //Triangle 8
+	boxTriangles.push_back(Triangle(G,H,D,hit.shader)); //Triangle 9
 	//Bottom
-	boxTriangles.push_back(Triangle(G,F,E,hit.color)); //Triangle 10
-	boxTriangles.push_back(Triangle(G,H,F,hit.color)); //Triangle 11
+	boxTriangles.push_back(Triangle(G,F,E,hit.shader)); //Triangle 10
+	boxTriangles.push_back(Triangle(G,H,F,hit.shader)); //Triangle 11
 }

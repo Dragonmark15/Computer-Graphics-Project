@@ -11,8 +11,8 @@ class Box : public Shape {
 public:
 	~Box(){}
 	Box(Vector3D inputMinPt, Vector3D inputMaxPt);
-	Box(Vector3D inputMinPt, Vector3D inputMaxPt, Vector3D inputColor);
-	Vector3D getColor() {return hit.color;}
+	Box(Vector3D inputMinPt, Vector3D inputMaxPt, Shader inputShader);
+	Shader getShader() {return hit.shader;}
 	Vector3D getNormal() {return hit.normal;}
 
 	void intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &inputHit);

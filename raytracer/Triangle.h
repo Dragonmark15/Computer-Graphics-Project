@@ -3,13 +3,14 @@
 
 #include "Vector3D.h"
 #include "Shape.h"
+#include "Shader.h"
 
 class Triangle : public Shape {
 public:
 	~Triangle(){}
 	Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2);
-	Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Vector3D inputColor);
-	Vector3D getColor() {return hit.color;}
+	Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Shader inputShader);
+	Shader getShader() {return hit.shader;}
 	Vector3D getNormal() {return hit.normal;}
 
 	void intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &inputHit);

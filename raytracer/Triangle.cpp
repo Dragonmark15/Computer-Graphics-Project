@@ -4,16 +4,18 @@ Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2) {
 	v0 = inputv0;
 	v1 = inputv1;
 	v2 = inputv2;
-	hit.color.set(100,100,100);
+	Vector3D tempVector(100,100,100);
+	Shader defaultShader(tempVector);
+	hit.shader = defaultShader;
 	hit.normal = (v1 - v0).cross(v2 - v0);
 	hit.normal.normalize();
 }
 
-Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Vector3D inputColor) {
+Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Shader inputShader) {
 	v0 = inputv0;
 	v1 = inputv1;
 	v2 = inputv2;
-	hit.color = inputColor;
+	hit.shader = inputShader;
 	hit.normal = (v1 - v0).cross(v2 - v0);
 	hit.normal.normalize();
 }
@@ -22,6 +24,8 @@ void Triangle::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure 
 	float t = calculateT(rayIn);
 	if (t > tMin && t < tMax) {
 		tMax = t;
+		Vector3D pointOfImpact = rayIn.origin + (tMax * rayIn.direction);
+		hit.point = pointOfImpact;
 		inputHit = hit;
 	}
 }

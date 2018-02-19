@@ -9,6 +9,8 @@
 #include "png++/png.hpp"
 #include "handleGraphicsArgs.h"
 #include "RaytracerClasses.h"
+#include "Light.h"
+#include "Shader.h"
 #include "Sphere.h"
 #include "Triangle.h"
 #include "Box.h"
@@ -31,6 +33,7 @@ private:
 	std::vector<Sphere> sphereVector;
 	std::vector<Triangle> triangleVector;
 	std::vector<Box> boxVector;
+	std::vector<Light> lightVector;
 	int sceneWidth;
 	int sceneHeight;
 

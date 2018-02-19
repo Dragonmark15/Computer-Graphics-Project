@@ -10,6 +10,8 @@ add_library(raytracer
 	Scene.cpp Scene.h
 	SceneDataTypes.h
 	RaytracerClasses.h
+	Light.h
+	Shader.h LambertianShader.cpp
 )
 
 add_executable(Ray_Tracer
