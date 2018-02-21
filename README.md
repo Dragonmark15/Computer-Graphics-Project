@@ -1,2 +1,2 @@
 # Personal-Ray-Tracer
-Progress mad eon my own personal ray tracer
+Progress made on my own personal ray tracer
