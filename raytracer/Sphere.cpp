@@ -18,7 +18,8 @@ void Sphere::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &i
 			if(testValue.t2 > tMin && testValue.t2 < tMax) {
 				tMax = testValue.t2;
 				Vector3D pointOfImpact = rayIn.origin + (tMax * rayIn.direction);
-				hit.normal = -1 * (pointOfImpact - center) / radius;
+				hit.normal = (pointOfImpact - center) / radius;
+				hit.normal.normalize();
 				hit.point = pointOfImpact;
 				inputHit = hit;
 			}
@@ -26,7 +27,8 @@ void Sphere::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &i
 		else if(testValue.t1 > tMin && testValue.t1 < tMax) {
 			tMax = testValue.t1;
 			Vector3D pointOfImpact = rayIn.origin + (tMax * rayIn.direction);
-			hit.normal = -1 * (pointOfImpact - center) / radius;
+			hit.normal = (pointOfImpact - center) / radius;
+			hit.normal.normalize();
 			hit.point = pointOfImpact;
 			inputHit = hit;
 		}

@@ -33,7 +33,7 @@ void Triangle::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure 
 bool Triangle::intersect(const Ray rayIn) {
 	return (calculateT(rayIn) != 0);
 }
-
+/*
 float Triangle::calculateT(const Ray rayIn) {
 	float t; //If T is returned as 0, it doesn't intersect with the triangle
 	float distFromZero = hit.normal.dot(v0);
@@ -64,6 +64,39 @@ float Triangle::calculateT(const Ray rayIn) {
 		
 	} 
 }
+*/
+float Triangle::calculateT(const Ray rayIn) {
+	//Calculate barycentric coordinates through matrix method on page 79
+	float a,b,c,d,e,f,g,h,i,j,k,l,M,beta,gamma,t;
+	a =	v0[0] - v1[0];
+	b =	v0[1] - v1[1];
+	c =	v0[2] - v1[2];
+	d =	v0[0] - v2[0];
+	e =	v0[1] - v2[1];
+	f =	v0[2] - v2[2];
+	g = rayIn.direction[0];
+	h = rayIn.direction[1];
+	i = rayIn.direction[2];
+	j =	v0[0] - rayIn.origin[0];
+	k =	v0[1] - rayIn.origin[1];
+	l =	v0[2] - rayIn.origin[2];
+	//Calculate common values
+	float ei_hf = (e * i) - (h * f);
+	float gf_di = (g * f) - (d * i);
+	float dh_eg = (d * h) - (e * g);
+	float ak_jb = (a * k) - (j * b);
+	float jc_al = (j * c) - (a * l);
+	float bl_kc = (b * l) - (k * c);
+	//Calculate M, beta, gamma, and t
+	M = (a * ei_hf) + (b * gf_di) + (c * dh_eg);
+	beta = ((j * ei_hf) + (k * gf_di) + (l * dh_eg)) / M;
+	gamma = ((i * ak_jb) + (h * jc_al) + (g * bl_kc)) / M;
+	t = -1 * ((f * ak_jb) + (e * jc_al) + (d * bl_kc)) / M;
+	if(gamma < 0 || gamma > 1)  return 0;
+	if(beta < 0 || beta > (1 - gamma)) return 0;
+	return t;
+}
+
 
 float Triangle::triangleArea(const Vector3D a, const Vector3D b, const Vector3D c) {
 	Vector3D u = b - a;

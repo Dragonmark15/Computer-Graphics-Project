@@ -51,7 +51,6 @@ void Scene::genImage(){
 		{
 			
 			tMax = 1000000;
-			inputHit.shader.set(bgColor);
 			inputHit.normal.set(0,0,0);
 			rayIn.origin = mainCamera.getPosition();
 			rayIn.direction = mainCamera.genRay(x,y);
@@ -70,12 +69,14 @@ void Scene::genImage(){
 			{
 				boxVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
-			//std::cout << "Input hit Shader: " << inputHit.shader.getDiffuse() << std::endl;
-			//std::cout << "Normal: " << inputHit.normal << std::endl;
-			Vector3D finalColor = inputHit.shader.apply(inputHit.normal, inputHit.point, lightVector);
-			//std::cout << "Final color: " << finalColor << std::endl;
-			if(useNormalForColor) imData[y][x] = png::rgb_pixel(inputHit.normal[0]*255, inputHit.normal[1]*255, inputHit.normal[2]*255);
-			else imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
+			if(inputHit.normal[0] == 0 && inputHit.normal[1] == 0 && inputHit.normal[2] == 0) {
+				imData[y][x] = png::rgb_pixel(bgColor[0]*255, bgColor[1]*255, bgColor[2]*255);
+			}
+			else {
+				Vector3D finalColor = inputHit.shader.apply(inputHit.normal, inputHit.point, lightVector);
+				if(useNormalForColor) imData[y][x] = png::rgb_pixel((inputHit.normal[0]+1)*127, (inputHit.normal[1]+1)*127, (inputHit.normal[2]+1)*127);
+				else imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
+			}
 		}
 	}
 	imData.write(outputFileName);
