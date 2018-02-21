@@ -14,7 +14,7 @@ Sphere::Sphere(Vector3D inputCenter, float inputRadius, Shader inputShader) {
 void Sphere::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &inputHit) {
 	tValue testValue = calculateT(rayIn);
 	if(testValue.t1real) {
-		if(testValue.t2real && testValue.t2 > testValue.t1) {
+		if(testValue.t2real && testValue.t2 < testValue.t1) {
 			if(testValue.t2 > tMin && testValue.t2 < tMax) {
 				tMax = testValue.t2;
 				Vector3D pointOfImpact = rayIn.origin + (tMax * rayIn.direction);
