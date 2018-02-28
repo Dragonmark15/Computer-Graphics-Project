@@ -2,12 +2,15 @@
 #include <iostream>
 #include <vector>
 
+#include <GL/glew.h>
+
 #include <GLFW/glfw3.h>
 
 #define GLM_FORCE_RADIANS
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include "GLSL.h"
 
 void glfwErrorCallback(int error, const char* description)
 {
@@ -49,6 +52,9 @@ int main(void)
 
     // Make the window's context current
     glfwMakeContextCurrent(window);
+	
+	glewExperimental=true;
+	glewInit();
 
     const GLubyte* renderer = glGetString (GL_RENDERER);
     const GLubyte* version = glGetString (GL_VERSION);
@@ -82,13 +88,65 @@ int main(void)
     glClearColor(0.8, 0.4, 0.0, 1.0);
 
 	double start_time, end_time;
+
+	GLuint m_triangleVBO;
+	glGenBuffers(1, &m_triangleVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_triangleVBO);
+
+	int numFloatsNeeded = 3 * 3;
+	float* host_VertexBuffer = new float[ numFloatsNeeded ];
+
+	int tIdx = 0;
+
+	// V0
+	host_VertexBuffer[ tIdx++ ] = -0.6f; //-0.5f
+	host_VertexBuffer[ tIdx++ ] = -0.4f; //-0.5f
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+
+	// V1
+	host_VertexBuffer[ tIdx++ ] = 0.3f; //0.3f
+	host_VertexBuffer[ tIdx++ ] = -0.7f; //-0.7f
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+
+	// V2
+	host_VertexBuffer[ tIdx++ ] = 0.0f; 
+	host_VertexBuffer[ tIdx++ ] = 0.8f; //0.8f
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+
+	int numBytes = (numFloatsNeeded) * sizeof(float);
+	glBufferData(GL_ARRAY_BUFFER, numBytes, host_VertexBuffer, GL_STATIC_DRAW);
+	delete [] host_VertexBuffer;
+
+	GLuint m_VAO;
+	glGenVertexArrays(1, &m_VAO);
+	glBindVertexArray(m_VAO);
+
+	glEnableVertexAttribArray(0);  // enable attrib 0
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_triangleVBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+	
+	glBindVertexArray(0);
+
+	sivelab::GLSLObject shader;
+	shader.addShader( "vertexShader_passthrough.glsl", sivelab::GLSLObject::VERTEX_SHADER );
+	shader.addShader( "fragmentShader_passthrough.glsl", sivelab::GLSLObject::FRAGMENT_SHADER );
+	shader.createProgram();
+
     // Loop until the user closes the window 
-    while (!glfwWindowShouldClose(window))
+   while (!glfwWindowShouldClose(window))
     {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		shader.activate();
+
+		glBindVertexArray(m_VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindVertexArray(0);
+
+		shader.deactivate();
 	start_time = glfwGetTime();
         // Clear the window's buffer (or clear the screen to our
         // background color)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //
         // Eventually, any OpenGL code that renders your scene can go here
@@ -105,8 +163,8 @@ int main(void)
 		end_time = glfwGetTime();
 		if (glfwGetKey( window, GLFW_KEY_T ) == GLFW_PRESS)
 	    	std::cout << "Frame Rate: " << (1/(end_time - start_time)) << std::endl;
-    }
-  
+    } 
+
     // Terminate the application, close the window and clean-up any
     // OpenGL context memory
     glfwTerminate();
