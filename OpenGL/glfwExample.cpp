@@ -85,7 +85,7 @@ int main(void)
     glViewport(0, 0, fb_width, fb_height);
 
     // Set the background color for our window
-    glClearColor(0.8, 0.4, 0.0, 1.0);
+    glClearColor(0.4, 0.4, 0.4, 1.0);
 
 	double start_time, end_time;
 
@@ -93,25 +93,34 @@ int main(void)
 	glGenBuffers(1, &m_triangleVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_triangleVBO);
 
-	int numFloatsNeeded = 3 * 3;
+	int numFloatsNeeded = 3 * 6;
 	float* host_VertexBuffer = new float[ numFloatsNeeded ];
 
 	int tIdx = 0;
 
 	// V0
-	host_VertexBuffer[ tIdx++ ] = -0.6f; //-0.5f
-	host_VertexBuffer[ tIdx++ ] = -0.4f; //-0.5f
+	host_VertexBuffer[ tIdx++ ] = -0.5f;
+	host_VertexBuffer[ tIdx++ ] = -0.5f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 1.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
 
 	// V1
-	host_VertexBuffer[ tIdx++ ] = 0.3f; //0.3f
-	host_VertexBuffer[ tIdx++ ] = -0.7f; //-0.7f
+	host_VertexBuffer[ tIdx++ ] = 0.5f;
+	host_VertexBuffer[ tIdx++ ] = -0.5f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 1.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
 
 	// V2
-	host_VertexBuffer[ tIdx++ ] = 0.0f; 
-	host_VertexBuffer[ tIdx++ ] = 0.8f; //0.8f
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.5f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 1.0f;
 
 	int numBytes = (numFloatsNeeded) * sizeof(float);
 	glBufferData(GL_ARRAY_BUFFER, numBytes, host_VertexBuffer, GL_STATIC_DRAW);
@@ -122,15 +131,17 @@ int main(void)
 	glBindVertexArray(m_VAO);
 
 	glEnableVertexAttribArray(0);  // enable attrib 0
+	glEnableVertexAttribArray(1);  // enable attrib 1
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_triangleVBO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (const GLvoid *)12); // Color
 	
 	glBindVertexArray(0);
 
 	sivelab::GLSLObject shader;
-	shader.addShader( "vertexShader_passthrough.glsl", sivelab::GLSLObject::VERTEX_SHADER );
-	shader.addShader( "fragmentShader_passthrough.glsl", sivelab::GLSLObject::FRAGMENT_SHADER );
+	shader.addShader( "vertexShader_perVertexColor.glsl", sivelab::GLSLObject::VERTEX_SHADER );
+	shader.addShader( "fragmentShader_vertexColorBlend.glsl", sivelab::GLSLObject::FRAGMENT_SHADER );
 	shader.createProgram();
 
     // Loop until the user closes the window 
