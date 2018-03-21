@@ -99,24 +99,30 @@ int main(void)
 	int tIdx = 0;
 
 	// V0
-	host_VertexBuffer[ tIdx++ ] = -0.5f;
-	host_VertexBuffer[ tIdx++ ] = -0.5f;
+	//host_VertexBuffer[ tIdx++ ] = -3.5f;
+	//host_VertexBuffer[ tIdx++ ] = -4.5f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 2.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 1.0f;
-	host_VertexBuffer[ tIdx++ ] = 0.0f;
-	host_VertexBuffer[ tIdx++ ] = 0.0f;
 
 	// V1
-	host_VertexBuffer[ tIdx++ ] = 0.5f;
-	host_VertexBuffer[ tIdx++ ] = -0.5f;
+	//host_VertexBuffer[ tIdx++ ] = 2.5f;
+	//host_VertexBuffer[ tIdx++ ] = -3.5f;
+	host_VertexBuffer[ tIdx++ ] = -1.0f;
+	host_VertexBuffer[ tIdx++ ] = -2.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 1.0f;
-	host_VertexBuffer[ tIdx++ ] = 0.0f;
 
 	// V2
-	host_VertexBuffer[ tIdx++ ] = 0.0f;
-	host_VertexBuffer[ tIdx++ ] = 0.5f;
+	//host_VertexBuffer[ tIdx++ ] = 4.0f;
+	//host_VertexBuffer[ tIdx++ ] = 4.5f;
+	host_VertexBuffer[ tIdx++ ] = 1.0f;
+	host_VertexBuffer[ tIdx++ ] = -2.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
@@ -144,11 +150,16 @@ int main(void)
 	shader.addShader( "fragmentShader_vertexColorBlend.glsl", sivelab::GLSLObject::FRAGMENT_SHADER );
 	shader.createProgram();
 
+	GLint pMatID = shader.createUniform("projMatrix");
+
     // Loop until the user closes the window 
    while (!glfwWindowShouldClose(window))
     {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		shader.activate();
+
+		glm::mat4 projMatrix = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -10.0f, 10.0f);
+		glUniformMatrix4fv(pMatID, 1, GL_FALSE, glm::value_ptr(projMatrix));
 
 		glBindVertexArray(m_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
