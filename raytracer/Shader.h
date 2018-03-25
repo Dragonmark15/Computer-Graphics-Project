@@ -3,19 +3,28 @@
 
 #include <math.h>
 #include <vector>
+#include <string>
 
 #include "Vector3D.h"
 #include "Light.h"
 
 class Shader {
 public:
-	Shader() {diffuse.set(.5,.5,.5);}
-	Shader(Vector3D inputDiffuse) {diffuse = inputDiffuse;}
+	Shader() {
+		diffuse.set(.5,.5,.5);
+		type = "Lambertian";
+	}
+	Shader(Vector3D inputDiffuse) {
+		diffuse = inputDiffuse;
+		type = "Lambertian";
+	}
 	~Shader(){}
-	void set(Vector3D inputDiffuse) {diffuse = inputDiffuse;}
+	void setDiffuse(Vector3D inputDiffuse) {diffuse = inputDiffuse;}
 	Vector3D getDiffuse() {return diffuse;}
+	std::string getType() {return type;}
 	virtual Vector3D apply(const Vector3D inputNormal, const Vector3D location, std::vector<Light> lightVector);
-private:
+protected:
 	Vector3D diffuse;
+	std::string type;
 };
 #endif

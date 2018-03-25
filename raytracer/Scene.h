@@ -3,6 +3,11 @@
 
 #include <string>
 #include <vector>
+#include <math.h>
+
+// Need to include the header of the code that reads and parses the
+// OBJ file
+#include "model_obj.h"
 
 #include "Vector3D.h"
 #include "Camera.h"
@@ -11,6 +16,7 @@
 #include "RaytracerClasses.h"
 #include "Light.h"
 #include "Shader.h"
+#include "Blinn-Phong.h"
 #include "Sphere.h"
 #include "Triangle.h"
 #include "Box.h"
@@ -32,6 +38,7 @@ private:
 	Camera mainCamera;
 	std::vector<Sphere> sphereVector;
 	std::vector<Triangle> triangleVector;
+	std::vector<Triangle*> trianglePointerVector;
 	std::vector<Box> boxVector;
 	std::vector<Light> lightVector;
 	int sceneWidth;
@@ -39,6 +46,8 @@ private:
 
     void parseShapeData( ptree::value_type const &v );
     shaderData* parseShaderData( ptree::value_type const &v );
+
+	std::vector<Triangle*> OBJparse(GraphicsArgs args);
     
     // std::map<std::string, Texture*> textureSources;
     std::map<std::string, shaderData*> shaderMap;

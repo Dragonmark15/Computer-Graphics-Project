@@ -12,6 +12,7 @@ add_library(raytracer
 	RaytracerClasses.h
 	Light.h
 	Shader.h LambertianShader.cpp
+	Blinn-Phong.cpp Blinn-Phong.h
 )
 
 add_executable(Ray_Tracer
