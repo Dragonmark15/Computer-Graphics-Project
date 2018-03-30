@@ -51,7 +51,7 @@ void Scene::genImage(){
 		for (size_t x = 0; x < imData.get_width(); ++x)
 		{
 			
-			tMax = 1000000;
+			tMax = 1e7;
 			inputHit.normal.set(0,0,0);
 			rayIn.origin = mainCamera.getPosition();
 			rayIn.direction = mainCamera.genRay(x,y);
@@ -63,12 +63,31 @@ void Scene::genImage(){
 			//Set pixel color
 			if(inputHit.normal.length() != 0) { //Object was hit
 
-				finalColor = inputHit.shader->apply(inputHit.normal, inputHit.point, mainCamera.getPosition(), lightVector);
+				finalColor = inputHit.shader->getDiffuse() * inputHit.shader->getAmbient(); //Ambient color
+
+				//Shadow Generation
+				Ray shadowRay;
+				shadowRay.origin = inputHit.point;
+				float tShadowMax;
+				HitStructure shadowHit;
+				bool hasDirectLight = false; //If false, need to calculate ambient color
+				for(int j = 0; j < lightVector.size(); j++) {
+					shadowRay.direction = lightVector[j].getPosition() - shadowRay.origin;
+					tShadowMax = 1e7;
+					for(int k = 0; k < shapeVector.size(); k++)
+					{
+						shapeVector[k]->intersect(shadowRay, 0.001, tShadowMax, shadowHit);
+					}
+					if(shadowHit.normal.length() == 0) { //No objects between primary object and light
+						hasDirectLight = true;
+						finalColor += inputHit.shader->apply(inputHit.normal, inputHit.point, mainCamera.getPosition(), lightVector[j]);
+					}
+				}
 				if(useNormalForColor)
 					finalColor.set((inputHit.normal[0]+1)*127, (inputHit.normal[1]+1)*127, (inputHit.normal[2]+1)*127);
-
-				imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
 			}
+			finalColor.clamp(0,1);
+			imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
 		}
 	}
 	imData.write(outputFileName);
