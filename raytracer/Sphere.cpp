@@ -5,7 +5,7 @@ Sphere::Sphere(Vector3D inputCenter, float inputRadius) {
 	radius = inputRadius;
 }
 
-Sphere::Sphere(Vector3D inputCenter, float inputRadius, Shader inputShader) {
+Sphere::Sphere(Vector3D inputCenter, float inputRadius, Shader* inputShader) {
 	center = inputCenter;
 	radius = inputRadius;
 	hit.shader = inputShader;

@@ -5,13 +5,13 @@ Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2) {
 	v1 = inputv1;
 	v2 = inputv2;
 	Vector3D tempVector(100,100,100);
-	Shader defaultShader(tempVector);
+	Shader* defaultShader = new Shader(tempVector);
 	hit.shader = defaultShader;
 	hit.normal = (v1 - v0).cross(v2 - v0);
 	hit.normal.normalize();
 }
 
-Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Shader inputShader) {
+Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Shader* inputShader) {
 	v0 = inputv0;
 	v1 = inputv1;
 	v2 = inputv2;

@@ -6,6 +6,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include "Vector3D.h"
+
 #define GLM_FORCE_RADIANS
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
@@ -150,7 +152,11 @@ int main(void)
 	shader.addShader( "fragmentShader_vertexColorBlend.glsl", sivelab::GLSLObject::FRAGMENT_SHADER );
 	shader.createProgram();
 
-	GLint pMatID = shader.createUniform("projMatrix");
+	GLint projMatrixID = shader.createUniform("projMatrix");
+	GLint viewMatrixID = shader.createUniform("viewMatrix");
+	GLint modelMatrixID = shader.createUniform("modelMatrix");
+
+	Camera cam("Perspective", sivelab::Vector3D(0,0,-5), sivelab::Vector3D(0,0,1), 1.0, 0.5, 250, 250);
 
     // Loop until the user closes the window 
    while (!glfwWindowShouldClose(window))
@@ -158,8 +164,9 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		shader.activate();
 
-		glm::mat4 projMatrix = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, -10.0f, 10.0f);
-		glUniformMatrix4fv(pMatID, 1, GL_FALSE, glm::value_ptr(projMatrix));
+		glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr( cam.getProjectionMatrix() ));
+		glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, glm::value_ptr( cam.getViewMatrix() ));
+		glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, glm::value_ptr( modelTransform ));
 
 		glBindVertexArray(m_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);

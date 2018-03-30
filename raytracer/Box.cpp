@@ -4,12 +4,12 @@ Box::Box(Vector3D inputMinPt, Vector3D inputMaxPt) {
 	minPt = inputMinPt;
 	maxPt = inputMaxPt;
 	Vector3D tempVector(100,100,100);
-	Shader defaultShader(tempVector);
+	Shader* defaultShader = new Shader(tempVector);
 	hit.shader = defaultShader;
 	calculateBoxTriangles();
 }
 
-Box::Box(Vector3D inputMinPt, Vector3D inputMaxPt, Shader inputShader) {
+Box::Box(Vector3D inputMinPt, Vector3D inputMaxPt, Shader* inputShader) {
 	minPt = inputMinPt;
 	maxPt = inputMaxPt;
 	hit.shader = inputShader;

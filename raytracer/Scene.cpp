@@ -13,27 +13,31 @@ Scene::Scene(int argc, char *argv[])
 	sceneWidth = args.width;
 	sceneHeight = args.height;
 	bgColor.set(0.25,0.25,0.25);	//Set a default value, in case XML doesn't specify
-/* .obj code
-	trianglePointerVector = OBJparse(args);
-	Camera newCamera("perspecive", Vector3D(5,0,0), Vector3D(-1,0,0), 1.0, 0.5, sceneWidth, sceneHeight);
-	mainCamera = newCamera;
-*/
-	//Begin data parse
-	XMLSceneParser xmlScene;
 
-	// register object creation function with xmlScene
-	xmlScene.registerCallback("camera", this);
-	xmlScene.registerCallback("light", this);
-	xmlScene.registerCallback("shader", this);
-	xmlScene.registerCallback("shape", this);
 
-	if (args.inputFileName != "")
+	if (args.inputFileName.find(".obj") != std::string::npos) { //OBJ parsing
+		OBJparse(args);
+		Camera newCamera("perspecive", Vector3D(5,0,0), Vector3D(-1,0,0), 1.0, 0.5, sceneWidth, sceneHeight);
+		mainCamera = newCamera;
+	}
+	else if (args.inputFileName.find(".xml") != std::string::npos) { //XML parsing
+		//Begin data parse
+		XMLSceneParser xmlScene;
+
+		// register object creation function with xmlScene
+		xmlScene.registerCallback("camera", this);
+		xmlScene.registerCallback("light", this);
+		xmlScene.registerCallback("shader", this);
+		xmlScene.registerCallback("shape", this);
+
 		xmlScene.parseFile( args.inputFileName );
+	}
 	else
 	{
-		std::cerr << "Need input file!" << std::endl;
+		std::cerr << "Incorrect input file!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
+
 }
 
 void Scene::genImage(){
@@ -41,6 +45,7 @@ void Scene::genImage(){
 	float tMax;
 	Ray rayIn;
 	HitStructure inputHit;
+	Vector3D finalColor(bgColor[0]*255, bgColor[1]*255, bgColor[2]*255); //Set default color to background color
 	for (size_t y = 0; y < imData.get_height(); ++y)
 	{
 		for (size_t x = 0; x < imData.get_width(); ++x)
@@ -50,38 +55,19 @@ void Scene::genImage(){
 			inputHit.normal.set(0,0,0);
 			rayIn.origin = mainCamera.getPosition();
 			rayIn.direction = mainCamera.genRay(x,y);
-			//Iterate through spheres
-			for(int i = 0; i < sphereVector.size(); i++)
+			//Iterate through all shapes
+			for(int i = 0; i < shapeVector.size(); i++)
 			{
-				sphereVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
+				shapeVector[i]->intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
 			}
-			//Iterate through triangles
-			for(int i = 0; i < triangleVector.size(); i++)
-			{
-				triangleVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
-			}
-			//Iterate through triangle pointers (OBJ)
-			for(int i = 0; i < trianglePointerVector.size(); i++)
-			{
-				trianglePointerVector[i]->intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
-			}
-			//Iterate through boxes
-			for (int i = 0; i < boxVector.size(); i++)
-			{
-				boxVector[i].intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
-			}
-			if(inputHit.normal.length() == 0) { //If miss, set color to background
-				imData[y][x] = png::rgb_pixel(bgColor[0]*255, bgColor[1]*255, bgColor[2]*255);
-			}
-			else {
-				Vector3D finalColor;
-				std::string type = inputHit.shader.getType();
-				if(type == "BlinnPhong")
-					finalColor = tempShader->apply(inputHit.normal, inputHit.point, mainCamera.getPosition(), lightVector);
-				else if(type == "Lambertian")
-					finalColor = inputHit.shader.apply(inputHit.normal, inputHit.point, lightVector);
-				if(useNormalForColor) imData[y][x] = png::rgb_pixel((inputHit.normal[0]+1)*127, (inputHit.normal[1]+1)*127, (inputHit.normal[2]+1)*127);
-				else imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
+			//Set pixel color
+			if(inputHit.normal.length() != 0) { //Object was hit
+
+				finalColor = inputHit.shader->apply(inputHit.normal, inputHit.point, mainCamera.getPosition(), lightVector);
+				if(useNormalForColor)
+					finalColor.set((inputHit.normal[0]+1)*127, (inputHit.normal[1]+1)*127, (inputHit.normal[2]+1)*127);
+
+				imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
 			}
 		}
 	}
@@ -294,25 +280,15 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.center = center;
     shape.shader = *shaderPtr;
 
-	switch (shape.shader.type) {
-		case blinnphong:
-		case phong:
-		{
-			BlinnPhong newShader(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
-			tempShader = newShader;
-			break;
-		}
-		case lambertian:
-		default:
-		{
-			Shader newShader(shape.shader.kd_diffuse);
-			tempShader = newShader;
-			break;
-		}
-	}
+	Shader* newShader = NULL;
 
-	Sphere newSphere(shape.center, shape.radius, tempShader);
-	sphereVector.push_back(newSphere);
+	if(shape.shader.type == blinnphong || shape.shader.type == phong)
+		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
+	else if (shape.shader.type == lambertian)
+		newShader = new Shader(shape.shader.kd_diffuse);
+
+	//Sphere newSphere(shape.center, shape.radius, newShader);
+	shapeVector.push_back(new Sphere(shape.center, shape.radius, newShader));
 
     std::cout << "\tFound sphere!" << std::endl;
   }
@@ -335,25 +311,10 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.maxPt = maxPt;
     shape.shader = *shaderPtr;
 
-	switch (shape.shader.type) {
-		case blinnphong:
-		case phong:
-		{
-			BlinnPhong newShader(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
-			tempShader = newShader;
-			break;
-		}
-		case lambertian:
-		default:
-		{
-			Shader newShader(shape.shader.kd_diffuse);
-			tempShader = newShader;
-			break;
-		}
-	}
+	Shader* newShader = new Shader(shape.shader.kd_diffuse);
 
-	Box newBox(shape.minPt, shape.maxPt, tempShader);
-	boxVector.push_back(newBox);
+	//Box newBox(shape.minPt, shape.maxPt, newShader);
+	shapeVector.push_back(new Box(shape.minPt, shape.maxPt, newShader));
     std::cout << "\tFound box!" << std::endl;
   }
 
@@ -379,25 +340,10 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.v2 = v2;
     shape.shader = *shaderPtr;
 
-	switch (shape.shader.type) {
-		case blinnphong:
-		case phong:
-		{
-			BlinnPhong newShader(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
-			tempShader = newShader;
-			break;
-		}
-		case lambertian:
-		default:
-		{
-			Shader newShader(shape.shader.kd_diffuse);
-			tempShader = newShader;
-			break;
-		}
-	}
+	Shader* newShader = new Shader(shape.shader.kd_diffuse);
 
-	Triangle newTriangle(shape.v0, shape.v1, shape.v2, tempShader);
-	triangleVector.push_back(newTriangle);
+	//Triangle newTriangle(shape.v0, shape.v1, shape.v2, newShader);
+	shapeVector.push_back(new Triangle(shape.v0, shape.v1, shape.v2, newShader));
 
     std::cout << "\tFound triangle!" << std::endl;
   }
@@ -490,13 +436,13 @@ shaderData* Scene::parseShaderData( ptree::value_type const &v )
   return 0;
 }
 
-std::vector<Triangle*> Scene::OBJparse(GraphicsArgs args){
+void Scene::OBJparse(GraphicsArgs args){
 
 	// Store all triangles in the OBJ file in a triangle list
 	// this is the primary list of all geometry in the 3D model
 	// that we will build up while iterating over the structures
 	// in the OBJ file data.
-	std::vector<Triangle*> triangleList;
+	// std::vector<Triangle*> triangleList;
 
 	// ///////////////////////////////
 	// the following code is needed for reading the OBJ files and
@@ -600,8 +546,7 @@ std::vector<Triangle*> Scene::OBJparse(GraphicsArgs args){
       		// and so on for each vertex
 		
       		// be sure to add this triangle onto the triangle list
-      		triangleList.push_back(tPtr);
+      		shapeVector.push_back(tPtr);
     	} 
 	}
-	return triangleList;
 }

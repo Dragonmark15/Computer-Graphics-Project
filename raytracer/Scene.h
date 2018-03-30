@@ -36,10 +36,11 @@ private:
 	std::string outputFileName;
 	Vector3D bgColor;
 	Camera mainCamera;
-	std::vector<Sphere> sphereVector;
+	std::vector<Shape*> shapeVector;
+	/*std::vector<Sphere> sphereVector;
 	std::vector<Triangle> triangleVector;
 	std::vector<Triangle*> trianglePointerVector;
-	std::vector<Box> boxVector;
+	std::vector<Box> boxVector;*/
 	std::vector<Light> lightVector;
 	int sceneWidth;
 	int sceneHeight;
@@ -47,7 +48,7 @@ private:
     void parseShapeData( ptree::value_type const &v );
     shaderData* parseShaderData( ptree::value_type const &v );
 
-	std::vector<Triangle*> OBJparse(GraphicsArgs args);
+	void OBJparse(GraphicsArgs args);
     
     // std::map<std::string, Texture*> textureSources;
     std::map<std::string, shaderData*> shaderMap;

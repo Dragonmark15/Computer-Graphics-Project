@@ -22,7 +22,7 @@ public:
 	void setDiffuse(Vector3D inputDiffuse) {diffuse = inputDiffuse;}
 	Vector3D getDiffuse() {return diffuse;}
 	std::string getType() {return type;}
-	virtual Vector3D apply(const Vector3D inputNormal, const Vector3D location, std::vector<Light> lightVector);
+	virtual Vector3D apply(const Vector3D inputNormal, const Vector3D location, const Vector3D cameraLocation, std::vector<Light> lightVector);
 protected:
 	Vector3D diffuse;
 	std::string type;

@@ -12,7 +12,7 @@ struct Ray {
 };
 
 struct HitStructure {
-	Shader shader;
+	Shader* shader;
 	Vector3D normal;
 	Vector3D point;
 };

@@ -17,12 +17,12 @@ class Sphere : public Shape {
 public:
 	~Sphere(){}
 	Sphere(Vector3D inputCenter, float inputRadius);
-	Sphere(Vector3D inputCenter, float inputRadius, Shader inputShader);
+	Sphere(Vector3D inputCenter, float inputRadius, Shader* inputShader);
 
 	void intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &hit);
 	bool intersect(const Ray rayIn);
 
-	Shader getShader() {return hit.shader;}
+	Shader* getShader() {return hit.shader;}
 private:
 	Vector3D center;
 	float radius;
