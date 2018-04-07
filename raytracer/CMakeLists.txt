@@ -13,6 +13,7 @@ add_library(raytracer
 	Light.h
 	Shader.h LambertianShader.cpp
 	Blinn-Phong.cpp Blinn-Phong.h
+	Reflective.cpp Reflective.h
 )
 
 add_executable(Ray_Tracer

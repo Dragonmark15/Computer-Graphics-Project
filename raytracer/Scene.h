@@ -17,6 +17,7 @@
 #include "Light.h"
 #include "Shader.h"
 #include "Blinn-Phong.h"
+#include "Reflective.h"
 #include "Sphere.h"
 #include "Triangle.h"
 #include "Box.h"
@@ -32,18 +33,20 @@ public:
 	void genImage();
 	bool useNormalForColor;
 	void instance( ptree::value_type const &v ); 
+	std::vector<Shape*> getShapeVector() {return shapeVector;}
+	int getReflectiveEnergy() {
+		reflectiveEnergy--;
+		return reflectiveEnergy;
+	}
 private:
 	std::string outputFileName;
 	Vector3D bgColor;
 	Camera mainCamera;
 	std::vector<Shape*> shapeVector;
-	/*std::vector<Sphere> sphereVector;
-	std::vector<Triangle> triangleVector;
-	std::vector<Triangle*> trianglePointerVector;
-	std::vector<Box> boxVector;*/
 	std::vector<Light> lightVector;
 	int sceneWidth;
 	int sceneHeight;
+	int reflectiveEnergy; //Used for reflections to determine the level of recussion allowed
 
     void parseShapeData( ptree::value_type const &v );
     shaderData* parseShaderData( ptree::value_type const &v );

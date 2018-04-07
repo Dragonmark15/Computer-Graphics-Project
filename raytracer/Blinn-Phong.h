@@ -2,7 +2,6 @@
 #define __BLINN_PHONG_H__
 
 #include <math.h>
-#include <vector>
 #include <string>
 
 #include "Vector3D.h"

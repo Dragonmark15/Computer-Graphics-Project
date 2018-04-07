@@ -45,12 +45,12 @@ void Scene::genImage(){
 	float tMax;
 	Ray rayIn;
 	HitStructure inputHit;
-	Vector3D finalColor(bgColor[0]*255, bgColor[1]*255, bgColor[2]*255); //Set default color to background color
+	Vector3D finalColor;
 	for (size_t y = 0; y < imData.get_height(); ++y)
 	{
 		for (size_t x = 0; x < imData.get_width(); ++x)
 		{
-			
+			reflectiveEnergy = 5;
 			tMax = 1e7;
 			inputHit.normal.set(0,0,0);
 			rayIn.origin = mainCamera.getPosition();
@@ -86,6 +86,8 @@ void Scene::genImage(){
 				if(useNormalForColor)
 					finalColor.set((inputHit.normal[0]+1)*127, (inputHit.normal[1]+1)*127, (inputHit.normal[2]+1)*127);
 			}
+			else //No object hit
+				finalColor.set(bgColor);
 			finalColor.clamp(0,1);
 			imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
 		}
@@ -303,6 +305,8 @@ void Scene::parseShapeData( ptree::value_type const &v )
 
 	if(shape.shader.type == blinnphong || shape.shader.type == phong)
 		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
+	else if (shape.shader.type == mirror)
+		newShader = new Reflective(this);
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(shape.shader.kd_diffuse);
 
@@ -330,7 +334,14 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.maxPt = maxPt;
     shape.shader = *shaderPtr;
 
-	Shader* newShader = new Shader(shape.shader.kd_diffuse);
+	Shader* newShader = NULL;
+
+	if(shape.shader.type == blinnphong || shape.shader.type == phong)
+		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
+	else if (shape.shader.type == mirror)
+		newShader = new Reflective(this);
+	else if (shape.shader.type == lambertian)
+		newShader = new Shader(shape.shader.kd_diffuse);
 
 	//Box newBox(shape.minPt, shape.maxPt, newShader);
 	shapeVector.push_back(new Box(shape.minPt, shape.maxPt, newShader));
@@ -359,7 +370,14 @@ void Scene::parseShapeData( ptree::value_type const &v )
     shape.v2 = v2;
     shape.shader = *shaderPtr;
 
-	Shader* newShader = new Shader(shape.shader.kd_diffuse);
+	Shader* newShader = NULL;
+
+	if(shape.shader.type == blinnphong || shape.shader.type == phong)
+		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
+	else if (shape.shader.type == mirror)
+		newShader = new Reflective(this);
+	else if (shape.shader.type == lambertian)
+		newShader = new Shader(shape.shader.kd_diffuse);
 
 	//Triangle newTriangle(shape.v0, shape.v1, shape.v2, newShader);
 	shapeVector.push_back(new Triangle(shape.v0, shape.v1, shape.v2, newShader));
