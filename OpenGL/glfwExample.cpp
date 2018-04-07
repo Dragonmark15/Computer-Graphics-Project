@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Vector3D.h"
+#include "Camera.h"
 
 #define GLM_FORCE_RADIANS
 #include "glm/glm.hpp"
@@ -156,13 +157,24 @@ int main(void)
 	GLint viewMatrixID = shader.createUniform("viewMatrix");
 	GLint modelMatrixID = shader.createUniform("modelMatrix");
 
-	Camera cam("Perspective", sivelab::Vector3D(0,0,-5), sivelab::Vector3D(0,0,1), 1.0, 0.5, 250, 250);
+	Camera cam("Perspective", sivelab::Vector3D(5,0,-5), sivelab::Vector3D(-1,0,1), 1.0, 0.5, 250, 250);
+	
+	glm::mat4 modelTransform;
 
     // Loop until the user closes the window 
    while (!glfwWindowShouldClose(window))
     {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		shader.activate();
+
+		if (glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS)
+            cam.setPosition(cam.getPosition() - cam.getW());
+		if (glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS)
+            cam.setPosition(cam.getPosition() + cam.getW());
+		if (glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS)
+            cam.setPosition(cam.getPosition() - cam.getU());
+		if (glfwGetKey( window, GLFW_KEY_D ) == GLFW_PRESS)
+            cam.setPosition(cam.getPosition() + cam.getU());
 
 		glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr( cam.getProjectionMatrix() ));
 		glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, glm::value_ptr( cam.getViewMatrix() ));

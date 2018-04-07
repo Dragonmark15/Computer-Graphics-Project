@@ -84,15 +84,19 @@ Vector3D Camera::genRay(int x, int y) { //x,y ranges from [0,pixelWidth] or [0,p
 
 */
 
-glm::mat4 getProjectionMatrix() {
+glm::mat4 Camera::getProjectionMatrix() {
 	float aspectRatio = mainData.pixelWidth / mainData.pixelHeight;
 	float vFOV = atan2f(t , mainData.focalLength);
 	vFOV *= 2;
 	return glm::perspective(vFOV, aspectRatio, mainData.focalLength, 200.0f);
 }
 
-glm::mat4 getViewMatrix() {
-	return glm::lookAt(mainData.position, mainData.position - mainData.W, mainData.v);
+glm::mat4 Camera::getViewMatrix() {
+	glm::vec3 pos = glm::vec3(mainData.position[0], mainData.position[1], mainData.position[2]);
+	glm::vec3 center = glm::vec3((mainData.position - mainData.W)[0], (mainData.position - mainData.W)[1], (mainData.position - mainData.W)[2]);
+	glm::vec3 up = glm::vec3(mainData.V[0], mainData.V[1], mainData.V[2]);
+
+	return glm::lookAt(pos, center, up);
 }
 
 
