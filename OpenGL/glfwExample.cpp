@@ -8,6 +8,7 @@
 
 #include "Vector3D.h"
 #include "Camera.h"
+#include "png++/png.hpp"
 
 #define GLM_FORCE_RADIANS
 #include "glm/glm.hpp"
@@ -96,40 +97,73 @@ int main(void)
 	glGenBuffers(1, &m_triangleVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_triangleVBO);
 
-	int numFloatsNeeded = 3 * 6;
+	int numFloatsNeeded = 3 * 8;
 	float* host_VertexBuffer = new float[ numFloatsNeeded ];
 
+	//Get Texture Images
+	std::string texFilename = "textureMapCalibration_1024x1024.png";
+	std::cout << "Reading texture map data from file: " << texFilename << std::endl;
+	png::image< png::rgb_pixel > texPNGImage;
+	texPNGImage.read( texFilename );
+	int pngWidth = texPNGImage.get_width();
+	int pngHeight = texPNGImage.get_height();
+	float *copiedPNGData = new float[ pngHeight * pngWidth * 3 ];
+	
 	int tIdx = 0;
+	for (unsigned int idx=0; idx<pngHeight*pngWidth; ++idx) {
+		size_t col = idx % pngWidth;
+		size_t row = static_cast<size_t>( floor(idx / static_cast<float>(pngWidth)) );
+ 
+		png::rgb_pixel texel = texPNGImage[ pngHeight-1 - row ][col];
+ 
+		copiedPNGData[tIdx++] = texel.red/255.0;
+		copiedPNGData[tIdx++] = texel.green/255.0;
+		copiedPNGData[tIdx++] = texel.blue/255.0;
+	} 
+	//Add textures to glTextures
+	GLuint texID;
+	glGenTextures(1, &texID);
+
+	glBindTexture(GL_TEXTURE_2D, texID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, pngWidth, pngHeight, 0, GL_RGB, GL_FLOAT, copiedPNGData);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	delete [] copiedPNGData;
+
+	tIdx = 0;
 
 	// V0
-	//host_VertexBuffer[ tIdx++ ] = -3.5f;
-	//host_VertexBuffer[ tIdx++ ] = -4.5f;
-	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f; //COORDS
 	host_VertexBuffer[ tIdx++ ] = 2.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f; //NORMAL
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
-	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 1.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.5f; //TextureMap
 	host_VertexBuffer[ tIdx++ ] = 1.0f;
 
 	// V1
-	//host_VertexBuffer[ tIdx++ ] = 2.5f;
-	//host_VertexBuffer[ tIdx++ ] = -3.5f;
-	host_VertexBuffer[ tIdx++ ] = -1.0f;
+	host_VertexBuffer[ tIdx++ ] = -1.0f; //COORDS
 	host_VertexBuffer[ tIdx++ ] = -2.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
-	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f; //NORMAL
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 1.0f;
+	host_VertexBuffer[ tIdx++ ] = 1.0f; //TextureMap
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
 
 	// V2
-	//host_VertexBuffer[ tIdx++ ] = 4.0f;
-	//host_VertexBuffer[ tIdx++ ] = 4.5f;
-	host_VertexBuffer[ tIdx++ ] = 1.0f;
+	host_VertexBuffer[ tIdx++ ] = 1.0f; //COORDS
 	host_VertexBuffer[ tIdx++ ] = -2.0f;
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
-	host_VertexBuffer[ tIdx++ ] = 0.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f; //NORMAL
 	host_VertexBuffer[ tIdx++ ] = 0.0f;
 	host_VertexBuffer[ tIdx++ ] = 1.0f;
+	host_VertexBuffer[ tIdx++ ] = 0.0f; //TextureMap
+	host_VertexBuffer[ tIdx++ ] = 0.0f;
 
 	int numBytes = (numFloatsNeeded) * sizeof(float);
 	glBufferData(GL_ARRAY_BUFFER, numBytes, host_VertexBuffer, GL_STATIC_DRAW);
@@ -141,11 +175,14 @@ int main(void)
 
 	glEnableVertexAttribArray(0);  // enable attrib 0
 	glEnableVertexAttribArray(1);  // enable attrib 1
+	glEnableVertexAttribArray(2);  // enable attrib 2
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_triangleVBO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (const GLvoid *)12); // Color
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0); //Location
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *)12); // Color
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (const GLvoid *)24); // Color
 	
+
 	glBindVertexArray(0);
 
 	sivelab::GLSLObject shader;
@@ -160,6 +197,8 @@ int main(void)
 	Camera cam("Perspective", sivelab::Vector3D(5,0,-5), sivelab::Vector3D(-1,0,1), 1.0, 0.5, 250, 250);
 	
 	glm::mat4 modelTransform;
+
+	GLuint texUnitID;
 
     // Loop until the user closes the window 
    while (!glfwWindowShouldClose(window))
@@ -179,6 +218,10 @@ int main(void)
 		glUniformMatrix4fv(projMatrixID, 1, GL_FALSE, glm::value_ptr( cam.getProjectionMatrix() ));
 		glUniformMatrix4fv(viewMatrixID, 1, GL_FALSE, glm::value_ptr( cam.getViewMatrix() ));
 		glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, glm::value_ptr( modelTransform ));
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texID);
+		glUniform1i(texUnitID, 0);
 
 		glBindVertexArray(m_VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
