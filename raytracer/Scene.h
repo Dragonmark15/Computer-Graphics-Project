@@ -23,6 +23,7 @@
 #include "Box.h"
 #include "XMLSceneParser.h"
 #include "SceneDataTypes.h"
+#include "Matrix4x4.h"
 
 using namespace sivelab;
 using boost::property_tree::ptree;
@@ -33,12 +34,8 @@ public:
 	void genImage();
 	bool useNormalForColor;
 	void instance( ptree::value_type const &v ); 
-	std::vector<Shape*> getShapeVector() {return shapeVector;}
-	int getReflectiveEnergy() {
-		reflectiveEnergy--;
-		return reflectiveEnergy;
-	}
 private:
+	void rasterize();
 	std::string outputFileName;
 	Vector3D bgColor;
 	Camera mainCamera;
@@ -46,7 +43,6 @@ private:
 	std::vector<Light> lightVector;
 	int sceneWidth;
 	int sceneHeight;
-	int reflectiveEnergy; //Used for reflections to determine the level of recussion allowed
 
     void parseShapeData( ptree::value_type const &v );
     shaderData* parseShaderData( ptree::value_type const &v );

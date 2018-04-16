@@ -13,6 +13,9 @@ public:
 	Shader* getShader() {return hit.shader;}
 	Vector3D getNormal() {return hit.normal;}
 
+	Vector3D getVertex(int index);
+	void setVertex(Vector3D in, int index);
+
 	void intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &inputHit);
 	bool intersect(const Ray rayIn);
 

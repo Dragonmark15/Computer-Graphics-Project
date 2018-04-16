@@ -50,7 +50,6 @@ void Scene::genImage(){
 	{
 		for (size_t x = 0; x < imData.get_width(); ++x)
 		{
-			reflectiveEnergy = 5;
 			tMax = 1e7;
 			inputHit.normal.set(0,0,0);
 			rayIn.origin = mainCamera.getPosition();
@@ -63,7 +62,8 @@ void Scene::genImage(){
 			//Set pixel color
 			if(inputHit.normal.length() != 0) { //Object was hit
 
-				finalColor = inputHit.shader->getDiffuse() * inputHit.shader->getAmbient(); //Ambient color
+				//if(inputHit.shader->getType() != "Mirror")
+					finalColor = inputHit.shader->getDiffuse() * inputHit.shader->getAmbient(); //Ambient color
 
 				//Shadow Generation
 				Ray shadowRay;
@@ -306,11 +306,10 @@ void Scene::parseShapeData( ptree::value_type const &v )
 	if(shape.shader.type == blinnphong || shape.shader.type == phong)
 		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
 	else if (shape.shader.type == mirror)
-		newShader = new Reflective(this);
+		newShader = new Reflective(&shapeVector);
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(shape.shader.kd_diffuse);
 
-	//Sphere newSphere(shape.center, shape.radius, newShader);
 	shapeVector.push_back(new Sphere(shape.center, shape.radius, newShader));
 
     std::cout << "\tFound sphere!" << std::endl;
@@ -339,11 +338,10 @@ void Scene::parseShapeData( ptree::value_type const &v )
 	if(shape.shader.type == blinnphong || shape.shader.type == phong)
 		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
 	else if (shape.shader.type == mirror)
-		newShader = new Reflective(this);
+		newShader = new Reflective(&shapeVector);
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(shape.shader.kd_diffuse);
 
-	//Box newBox(shape.minPt, shape.maxPt, newShader);
 	shapeVector.push_back(new Box(shape.minPt, shape.maxPt, newShader));
     std::cout << "\tFound box!" << std::endl;
   }
@@ -375,11 +373,10 @@ void Scene::parseShapeData( ptree::value_type const &v )
 	if(shape.shader.type == blinnphong || shape.shader.type == phong)
 		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
 	else if (shape.shader.type == mirror)
-		newShader = new Reflective(this);
+		newShader = new Reflective(&shapeVector);
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(shape.shader.kd_diffuse);
 
-	//Triangle newTriangle(shape.v0, shape.v1, shape.v2, newShader);
 	shapeVector.push_back(new Triangle(shape.v0, shape.v1, shape.v2, newShader));
 
     std::cout << "\tFound triangle!" << std::endl;
@@ -587,3 +584,77 @@ void Scene::OBJparse(GraphicsArgs args){
     	} 
 	}
 }
+
+void Scene::rasterize() {
+
+	//Setup Rasterization Matricies
+	Matrix4x4 Mvp(	(double)sceneWidth/2,	0,				0,		((double)sceneWidth - 1)/2,
+					0,				(double)sceneHeight/2,	0,		((double)sceneHeight - 1)/2,
+					0,				0,				1,		0,
+					0,				0,				0,		1);
+
+	double l,r,b,t,n,f;
+	l = b = n = -1;
+	r = t = f = 1;
+
+	Matrix4x4 Mortho(	2/(r-l),	0,			0,			-1 * (r + l)/(r - l),
+						0,			2/(t-b),	0,			-1 * (t + b)/(t - b),
+						0,			0,			2/(n-f),	-1 * (n + f)/(n - f),
+						0,			0,			0,			1);
+
+	Matrix4x4 tempOrthoMatrix(	mainCamera.getU()[0],	mainCamera.getU()[1],	mainCamera.getU()[2],	0,
+								mainCamera.getV()[0],	mainCamera.getV()[1],	mainCamera.getV()[2],	0,
+								mainCamera.getW()[0],	mainCamera.getW()[1],	mainCamera.getW()[2],	0,
+								0,						0,						0,						1);
+
+	Matrix4x4 tempCamLocation(	1,	0,	0,	-1 * mainCamera.getPosition()[0],
+								0,	1,	0,	-1 * mainCamera.getPosition()[1],
+								0,	0,	1,	-1 * mainCamera.getPosition()[2],
+								0,	0,	0,	1);
+
+	Matrix4x4 Mcam = tempOrthoMatrix * tempCamLocation;
+
+	Matrix4x4 Mp; //TODO: Impliment transformation matrix support
+	Mp.setIdentity;
+
+	Matrix4x4 Mlocal(	(2*n)/(r-l),	0,				(l+r)/(l-r),	0,
+						0,				(2*n)/(t-b),	(b+t)/(b-t),	0,
+						0,				0,				(f+n)/(n-f),	(2*f*n)/(f-n),
+						0,				0,				1,				0);
+
+	Matrix4x4 M; //Set later in the for loop
+
+	std::vector<Shape*> updatedTriangles;
+
+	
+
+	//Begin Rasterization
+	for(int i = 0; i < shapeVector.size(); i++){
+		M = Mvp * Mortho * Mp;
+		Triangle* newTriangle = new Triangle(shapeVector[i]->getVertex(0),
+											shapeVector[i]->getVertex(1),
+											shapeVector[i]->getVertex(2),
+											shapeVector[i]->getShader(););
+		for(int j = 0; j <= 2; j++) { //For each vertex in the new triangle
+			double temp = 1;
+			Vector3D vCam = Mcam.multVector(Mlocal.multVector(newTriangle->getVertex(j),temp),temp);
+			//TODO: Shading
+			
+			
+		}		
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

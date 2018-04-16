@@ -8,22 +8,18 @@
 #include "Vector3D.h"
 #include "Shader.h"
 #include "Light.h"
+#include "Shape.h"
 
 using namespace sivelab;
 
-class Scene; // Forward Declaration
-
 class Reflective : public Shader {
 public:
-	Reflective(Scene* inputScenePtr); //Uses a scene pointer in order to get the objects for 
-	Reflective(Scene* inputScenePtr, Vector3D inputReflectColor);
-	Reflective(Scene* inputScenePtr, Vector3D inputReflectColor, float inputAmbient);
-	void setReflectColor(Vector3D inputReflectColor) {reflectColor = inputReflectColor;}
-	Vector3D getReflectColor() {return reflectColor;}
+	Reflective(std::vector<Shape*>* inputShapesPtr); //Uses a scene pointer in order to get the objects for 
+	Reflective(std::vector<Shape*>* inputShapesPtr, Vector3D inputReflectColor);
+	Reflective(std::vector<Shape*>* inputShapesPtr, Vector3D inputReflectColor, float inputAmbient);
 	Vector3D apply(const Vector3D inputNormal, const Vector3D location, const Vector3D cameraLocation, Light lightVector);
 protected:
-	Vector3D reflectColor;
-	Scene* scenePtr;
+	std::vector<Shape*>* shapesPtr;
 };
 
 #endif

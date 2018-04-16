@@ -33,38 +33,7 @@ void Triangle::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure 
 bool Triangle::intersect(const Ray rayIn) {
 	return (calculateT(rayIn) != 0);
 }
-/*
-float Triangle::calculateT(const Ray rayIn) {
-	float t; //If T is returned as 0, it doesn't intersect with the triangle
-	float distFromZero = hit.normal.dot(v0);
-	float tDenominator = hit.normal.dot(rayIn.direction);
-	if(tDenominator > -0.000001 && tDenominator < 0.000001) t = 0; //Zero test. If equal to zero, triangle is perpendicular to the ray
-	else {
-		//Calculate T
-		float tNumerator = hit.normal.dot(rayIn.origin) + distFromZero;
-		float t = tNumerator / tDenominator;
-		//Determine in p(t) is in the triangle
-		Vector3D P = rayIn.origin + (t * rayIn.direction); //The point on the plane and the ray
-		//Calculate barycentric coordinates using triangle area method
-		float areaAll = triangleArea(v0,v1,v2);
-		float areaA = triangleArea(v2,v0,P);
-		float areaB = triangleArea(v0,v1,P);
-		float areaC = triangleArea(v1,v2,P);
-		
-		float alpha = areaA/areaAll;
-		float beta = areaB/areaAll;
-		float gamma = areaC/areaAll;
 
-		if ((alpha+beta+gamma) > 0.99999 && (alpha+beta+gamma) < 1.00001 &&
-			alpha > 0 && alpha < 1 &&
-			beta > 0 && beta < 1 &&
-			gamma > 0 && gamma < 1) {}
-		else t = 0;
-		return t;
-		
-	} 
-}
-*/
 float Triangle::calculateT(const Ray rayIn) {
 	//Calculate barycentric coordinates through matrix method on page 79
 	float a,b,c,d,e,f,g,h,i,j,k,l,M,beta,gamma,t;
@@ -97,10 +66,50 @@ float Triangle::calculateT(const Ray rayIn) {
 	return t;
 }
 
-
 float Triangle::triangleArea(const Vector3D a, const Vector3D b, const Vector3D c) {
 	Vector3D u = b - a;
 	Vector3D v = c - a;
 	return (float)(0.5 * u.cross(v).length());
 }
+
+Vector3D Triangle::getVertex(int index){
+	switch(index){
+		case 0:
+			return v0;
+			break;
+		case 1:
+			return v1;
+			break;
+		case 2:
+			return v2;
+			break;
+		default:
+			std::cout << "Bad triangle vertex(get)" << std::endl;
+			exit(EXIT_FAILURE);
+	}
+}
+
+void Triangle::setVertex(Vector3D in, int index) {
+	switch(index){
+		case 0:
+			v0 = in;
+			break;
+		case 1:
+			v1 = in;
+			break;
+		case 2:
+			v2 = in;
+			break;
+		default:
+			std::cout << "Bad triangle vertex(set)" << std::endl;
+			exit(EXIT_FAILURE);
+	}
+}
+
+
+
+
+
+
+
 

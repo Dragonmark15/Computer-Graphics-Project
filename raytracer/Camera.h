@@ -26,7 +26,11 @@ public:
 	int getPixelWidth() {return mainData.pixelWidth;}
 	int getPixelHeight() {return mainData.pixelHeight;}
 	Vector3D getPosition() {return mainData.position;}
+	void setPosition(Vector3D newPos) {mainData.position = newPos;}
 	float getFocalLength() {return mainData.focalLength;}
+	Vector3D getU() {return mainData.U;}
+	Vector3D getV() {return mainData.V;}
+	Vector3D getW() {return mainData.W;}
 protected:
 	struct cameraData {		
 		CamType type;
