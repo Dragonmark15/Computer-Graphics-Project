@@ -34,8 +34,9 @@ public:
 	void genImage();
 	bool useNormalForColor;
 	void instance( ptree::value_type const &v ); 
+	Vector3D raycolor(Ray rayIn, float tMin, float tMax, int recursionValue);
+	bool hasDirectLight(Vector3D location, Light light);
 private:
-	void rasterize();
 	std::string outputFileName;
 	Vector3D bgColor;
 	Camera mainCamera;
@@ -43,7 +44,9 @@ private:
 	std::vector<Light> lightVector;
 	int sceneWidth;
 	int sceneHeight;
+	int recursion;
 
+	//void rasterize();
     void parseShapeData( ptree::value_type const &v );
     shaderData* parseShaderData( ptree::value_type const &v );
 

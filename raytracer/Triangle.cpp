@@ -1,5 +1,5 @@
 #include "Triangle.h"
-
+/*
 Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2) {
 	v0 = inputv0;
 	v1 = inputv1;
@@ -10,7 +10,7 @@ Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2) {
 	hit.normal = (v1 - v0).cross(v2 - v0);
 	hit.normal.normalize();
 }
-
+*/
 Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Shader* inputShader) {
 	v0 = inputv0;
 	v1 = inputv1;
@@ -31,7 +31,8 @@ void Triangle::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure 
 }
 
 bool Triangle::intersect(const Ray rayIn) {
-	return (calculateT(rayIn) != 0);
+	float t = calculateT(rayIn);
+	return (t > 1e-5);
 }
 
 float Triangle::calculateT(const Ray rayIn) {
@@ -71,7 +72,7 @@ float Triangle::triangleArea(const Vector3D a, const Vector3D b, const Vector3D 
 	Vector3D v = c - a;
 	return (float)(0.5 * u.cross(v).length());
 }
-
+/*
 Vector3D Triangle::getVertex(int index){
 	switch(index){
 		case 0:
@@ -105,7 +106,7 @@ void Triangle::setVertex(Vector3D in, int index) {
 			exit(EXIT_FAILURE);
 	}
 }
-
+*/
 
 
 

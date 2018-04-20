@@ -16,7 +16,7 @@ struct tValue {
 class Sphere : public Shape {
 public:
 	~Sphere(){}
-	Sphere(Vector3D inputCenter, float inputRadius);
+	//Sphere(Vector3D inputCenter, float inputRadius);
 	Sphere(Vector3D inputCenter, float inputRadius, Shader* inputShader);
 
 	void intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &hit);

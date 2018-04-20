@@ -13,7 +13,7 @@ Scene::Scene(int argc, char *argv[])
 	sceneWidth = args.width;
 	sceneHeight = args.height;
 	bgColor.set(0.25,0.25,0.25);	//Set a default value, in case XML doesn't specify
-
+	recursion = args.recursionDepth;;
 
 	if (args.inputFileName.find(".obj") != std::string::npos) { //OBJ parsing
 		OBJparse(args);
@@ -42,14 +42,17 @@ Scene::Scene(int argc, char *argv[])
 
 void Scene::genImage(){
 	png::image< png::rgb_pixel > imData( mainCamera.getPixelWidth(), mainCamera.getPixelHeight() );
-	float tMax;
 	Ray rayIn;
-	HitStructure inputHit;
+	//HitStructure inputHit;
 	Vector3D finalColor;
 	for (size_t y = 0; y < imData.get_height(); ++y)
 	{
 		for (size_t x = 0; x < imData.get_width(); ++x)
 		{
+			rayIn.origin = mainCamera.getPosition();
+			rayIn.direction = mainCamera.genRay(x,y);
+			finalColor = raycolor(rayIn, mainCamera.getFocalLength(), 1e7, recursion);
+/*
 			tMax = 1e7;
 			inputHit.normal.set(0,0,0);
 			rayIn.origin = mainCamera.getPosition();
@@ -83,16 +86,48 @@ void Scene::genImage(){
 						finalColor += inputHit.shader->apply(inputHit.normal, inputHit.point, mainCamera.getPosition(), lightVector[j]);
 					}
 				}
+
 				if(useNormalForColor)
 					finalColor.set((inputHit.normal[0]+1)*127, (inputHit.normal[1]+1)*127, (inputHit.normal[2]+1)*127);
 			}
 			else //No object hit
 				finalColor.set(bgColor);
+*/
 			finalColor.clamp(0,1);
 			imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
 		}
 	}
 	imData.write(outputFileName);
+}
+
+Vector3D Scene::raycolor(Ray rayIn, float tMin, float tMax, int recursionValue) {
+	HitStructure inputHit;
+	Vector3D finalColor;
+	inputHit.normal.set(0,0,0);
+	//Iterate through all shapes
+	for(int i = 0; i < shapeVector.size(); i++){
+		shapeVector[i]->intersect(rayIn, tMin, tMax, inputHit);
+	}
+	if(inputHit.normal.length() == 0)
+		finalColor = bgColor;
+	else {
+		for(int j = 0; j < lightVector.size(); j++) {
+			finalColor += inputHit.shader->apply(inputHit.normal, inputHit.point, mainCamera.getPosition(), lightVector[j], recursionValue);
+		}
+	}
+	return finalColor;
+}
+
+bool Scene::hasDirectLight(Vector3D location, Light light) {
+	Ray shadowRay;
+	shadowRay.origin = location;
+	shadowRay.direction = light.getPosition() - location;
+	bool noDirectLight = true;
+	for(int i = 0; i < shapeVector.size(); i++){
+		noDirectLight = shapeVector[i]->intersect(shadowRay);
+		if(noDirectLight) break;
+	}
+	return !noDirectLight;
 }
 
 void Scene::instance( ptree::value_type const &v )
@@ -282,7 +317,7 @@ void Scene::parseShapeData( ptree::value_type const &v )
     }
 
   shapeData shape;
-  Shader tempShader;
+  Shader tempShader(this);
 
   std::istringstream buf;
   if (type == "sphere") {
@@ -304,11 +339,11 @@ void Scene::parseShapeData( ptree::value_type const &v )
 	Shader* newShader = NULL;
 
 	if(shape.shader.type == blinnphong || shape.shader.type == phong)
-		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
+		newShader = new BlinnPhong(this, shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
 	else if (shape.shader.type == mirror)
-		newShader = new Reflective(&shapeVector);
+		newShader = new Reflective(this);
 	else if (shape.shader.type == lambertian)
-		newShader = new Shader(shape.shader.kd_diffuse);
+		newShader = new Shader(this, shape.shader.kd_diffuse);
 
 	shapeVector.push_back(new Sphere(shape.center, shape.radius, newShader));
 
@@ -336,11 +371,11 @@ void Scene::parseShapeData( ptree::value_type const &v )
 	Shader* newShader = NULL;
 
 	if(shape.shader.type == blinnphong || shape.shader.type == phong)
-		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
+		newShader = new BlinnPhong(this, shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
 	else if (shape.shader.type == mirror)
-		newShader = new Reflective(&shapeVector);
+		newShader = new Reflective(this);
 	else if (shape.shader.type == lambertian)
-		newShader = new Shader(shape.shader.kd_diffuse);
+		newShader = new Shader(this, shape.shader.kd_diffuse);
 
 	shapeVector.push_back(new Box(shape.minPt, shape.maxPt, newShader));
     std::cout << "\tFound box!" << std::endl;
@@ -371,11 +406,11 @@ void Scene::parseShapeData( ptree::value_type const &v )
 	Shader* newShader = NULL;
 
 	if(shape.shader.type == blinnphong || shape.shader.type == phong)
-		newShader = new BlinnPhong(shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
+		newShader = new BlinnPhong(this, shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
 	else if (shape.shader.type == mirror)
-		newShader = new Reflective(&shapeVector);
+		newShader = new Reflective(this);
 	else if (shape.shader.type == lambertian)
-		newShader = new Shader(shape.shader.kd_diffuse);
+		newShader = new Shader(this, shape.shader.kd_diffuse);
 
 	shapeVector.push_back(new Triangle(shape.v0, shape.v1, shape.v2, newShader));
 
@@ -545,6 +580,11 @@ void Scene::OBJparse(GraphicsArgs args){
    		// << ", " << pMaterial->diffuse[1]
    		// << ", " << pMaterial->diffuse[2] << std::endl;
 
+
+		/////////////////////DEFAULT SHADER////////////////////////////
+		Shader* newShader = new Shader(this, Vector3D(255,0,0));
+
+
    		// Iterate over all indices in this mesh
    		for (int i=pMesh->startIndex; i<(pMesh->startIndex + pMesh->triangleCount*3); i+=3) {
 
@@ -569,7 +609,7 @@ void Scene::OBJparse(GraphicsArgs args){
       		// know if you do this!
       		// 
       		// Using the actual vertices of the triangle, instance a new triangle!
-      		Triangle *tPtr = new Triangle( tv0, tv1, tv2 );
+      		Triangle *tPtr = new Triangle( tv0, tv1, tv2, newShader);
 
       		// In case you're interested, the OBJ files also provide the
       		// normal vectors at each vertex. You can access them like this:
@@ -584,7 +624,7 @@ void Scene::OBJparse(GraphicsArgs args){
     	} 
 	}
 }
-
+/*
 void Scene::rasterize() {
 
 	//Setup Rasterization Matricies
@@ -644,7 +684,7 @@ void Scene::rasterize() {
 		}		
 	}
 }
-
+*/
 
 
 

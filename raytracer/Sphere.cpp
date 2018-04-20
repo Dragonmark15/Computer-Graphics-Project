@@ -1,10 +1,10 @@
 #include "Sphere.h"
-
+/*
 Sphere::Sphere(Vector3D inputCenter, float inputRadius) {
 	center = inputCenter;
 	radius = inputRadius;
 }
-
+*/
 Sphere::Sphere(Vector3D inputCenter, float inputRadius, Shader* inputShader) {
 	center = inputCenter;
 	radius = inputRadius;
@@ -37,11 +37,13 @@ void Sphere::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &i
 
 bool Sphere::intersect(const Ray rayIn) {
 	tValue testValue = calculateT(rayIn);
-	return testValue.t1real;
+	return (testValue.t1real && testValue.t1 > 1e-3);
 }
 
 tValue Sphere::calculateT(const Ray rayIn) {
 	tValue returnValue;
+	returnValue.t1 = 0;
+	returnValue.t2 = 0;
 	double A, B, C; //Represent the values of A, B, and C in the quadratic formula
 	//Calculating A
 	A = rayIn.direction.dot(rayIn.direction);

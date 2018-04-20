@@ -1,38 +1,35 @@
 #include "Reflective.h"
+#include "Scene.h"
 
-Reflective::Reflective(std::vector<Shape*>* inputShapesPtr) { 
-	shapesPtr = inputShapesPtr;
+Reflective::Reflective(Scene* inputScenePtr) { 
+	scenePtr = inputScenePtr;
 	diffuse.set(0,0,0);
 	type = "Mirror";
 	ambient = 0.1;
 }
-Reflective::Reflective(std::vector<Shape*>* inputShapesPtr, Vector3D inputDiffuse) {
-	shapesPtr = inputShapesPtr;
+/*
+Reflective::Reflective(Scene* inputScenePtr, Vector3D inputDiffuse) {
+	scenePtr = inputScenePtr;
 	diffuse = inputDiffuse;
 	type = "Glaze";
 	ambient = 0.1;
 }
-Reflective::Reflective(std::vector<Shape*>* inputShapesPtr, Vector3D inputDiffuse, float inputAmbient) {
-	shapesPtr = inputShapesPtr;
+Reflective::Reflective(Scene* inputScenePtr, Vector3D inputDiffuse, float inputAmbient) {
+	scenePtr = inputScenePtr;
 	diffuse = inputDiffuse;
 	type = "Glaze";
 	ambient = inputAmbient;
 }
-
-Vector3D Reflective::apply(const Vector3D inputNormal, const Vector3D location, const Vector3D cameraLocation, Light lightVector) {
-	float tMax = 1e7;
-	HitStructure inputHit;
-	inputHit.normal.set(0,0,0);
-	Ray rayIn;
-	rayIn.origin = location;
-	Vector3D viewDir = location - cameraLocation;
-	rayIn.direction = viewDir - (2 * (viewDir.dot(inputNormal)) * inputNormal);
-	std::vector<Shape*> shapeVector = *shapesPtr;
-	//Iterate through all shapes
-	for(int i = 0; i < shapeVector.size(); i++)
-	{
-		shapeVector[i]->intersect(rayIn, 0.00001, tMax, inputHit);
+*/
+Vector3D Reflective::apply(const Vector3D inputNormal, const Vector3D location, const Vector3D viewOrigin, Light lightVector, int recursionValue) {
+	Vector3D finalColor(0,0,0);	
+	if(recursionValue > 0) {
+		Ray rayIn;
+		rayIn.origin = location;
+		Vector3D viewDir = location - viewOrigin;
+		rayIn.direction = viewDir - (2 * (viewDir.dot(inputNormal)) * inputNormal);
+		finalColor = scenePtr->raycolor(rayIn, 1e-7, 1e7, --recursionValue);
 	}
-	
-	return inputHit.shader->apply(inputHit.normal, inputHit.point, location, lightVector);
+	return finalColor;
 }
+

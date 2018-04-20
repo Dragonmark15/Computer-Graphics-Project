@@ -1,5 +1,5 @@
 #include "Box.h"
-
+/*
 Box::Box(Vector3D inputMinPt, Vector3D inputMaxPt) {
 	minPt = inputMinPt;
 	maxPt = inputMaxPt;
@@ -8,7 +8,7 @@ Box::Box(Vector3D inputMinPt, Vector3D inputMaxPt) {
 	hit.shader = defaultShader;
 	calculateBoxTriangles();
 }
-
+*/
 Box::Box(Vector3D inputMinPt, Vector3D inputMaxPt, Shader* inputShader) {
 	minPt = inputMinPt;
 	maxPt = inputMaxPt;
