@@ -58,6 +58,12 @@ Vector3D Camera::genRay(int x, int y) {
 	return ( ((-1 * mainData.focalLength) * mainData.W) + (u * mainData.U) + (v * mainData.V) );
 }
 
+Vector3D Camera::genRay(int x, int y, float xOffset, float yOffset) {
+	float u = l + (r - l)*(x + xOffset) / mainData.pixelWidth;
+	float v = b + (t - b)*(y + yOffset) / mainData.pixelHeight;
+	return (((-1 * mainData.focalLength) * mainData.W) + (u * mainData.U) + (v * mainData.V));
+}
+
 /*
 
 Vector3D Camera::genRay(int x, int y) { //x,y ranges from [0,pixelWidth] or [0,pixelHeight]

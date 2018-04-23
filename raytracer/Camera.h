@@ -22,6 +22,8 @@ public:
 	~Camera();
 
 	Vector3D genRay(int x, int y);
+	Vector3D genRay(int x, int y, float xOffset, float yOffset);
+
 
 	int getPixelWidth() {return mainData.pixelWidth;}
 	int getPixelHeight() {return mainData.pixelHeight;}

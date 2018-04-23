@@ -14,6 +14,7 @@ Scene::Scene(int argc, char *argv[])
 	sceneHeight = args.height;
 	bgColor.set(0.25,0.25,0.25);	//Set a default value, in case XML doesn't specify
 	recursion = args.recursionDepth;;
+	rpp = args.rpp;
 
 	if (args.inputFileName.find(".obj") != std::string::npos) { //OBJ parsing
 		OBJparse(args);
@@ -46,17 +47,33 @@ void Scene::genImage(){
 	else {
 		png::image< png::rgb_pixel > imData( mainCamera.getPixelWidth(), mainCamera.getPixelHeight() );
 		Ray rayIn;
-		//HitStructure inputHit;
-		Vector3D finalColor;
-		for (size_t y = 0; y < imData.get_height(); ++y)
-		{
-			for (size_t x = 0; x < imData.get_width(); ++x)
-			{
-				rayIn.origin = mainCamera.getPosition();
-				rayIn.direction = mainCamera.genRay(x,y);
-				finalColor = raycolor(rayIn, mainCamera.getFocalLength(), 1e7, recursion);
-				finalColor.clamp(0,1);
-				imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
+		Vector3D pixelColor;
+		Vector3D finalColor(0,0,0);
+		float yOffset;
+		float xOffset;
+		//Setup proper offsets
+		int vertRays = (int)sqrt(rpp);
+		while (rpp % vertRays != 0)
+			vertRays--;
+		int horzRays = rpp / vertRays;
+		for (size_t y = 0; y < imData.get_height(); ++y) { //Y screen loop
+			for (size_t x = 0; x < imData.get_width(); ++x) { //X screen loop
+				std::vector<Vector3D> rppColors;
+				for (int a = 0; a < vertRays; a++) { //Vertical anti-aliasing loop
+					yOffset = a * (1 / (float)vertRays);
+					for (int b = 0; b < horzRays; a++) { //Horizontal anti-aliasing loop
+						xOffset = a * (1 / (float)horzRays);
+						rayIn.origin = mainCamera.getPosition();
+						rayIn.direction = mainCamera.genRay(x, y, yOffset, xOffset);
+						pixelColor = raycolor(rayIn, mainCamera.getFocalLength(), 1e7, recursion);
+						pixelColor.clamp(0, 1);
+						rppColors.push_back(pixelColor);
+					}
+				}
+				for (int c = 0; c < rpp; c++) {
+					finalColor += (pixelColor[c] / rpp);
+				}
+				imData[y][x] = png::rgb_pixel(finalColor[0] * 255, finalColor[1] * 255, finalColor[2] * 255);
 			}
 		}
 		imData.write(outputFileName);

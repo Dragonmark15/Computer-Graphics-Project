@@ -46,6 +46,7 @@ private:
 	int sceneHeight;
 	int recursion;
 	bool rasterization;
+	int rpp;
 
 	void rasterize();
 	float rasterBaryCoords(Vector3D vec0, Vector3D vec1, float x, float y);
