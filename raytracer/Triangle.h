@@ -10,17 +10,17 @@ public:
 	~Triangle(){}
 	//Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2);
 	Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Shader* inputShader);
-	Shader* getShader() {return hit.shader;}
-	Vector3D getNormal() {return hit.normal;}
-/*
-	Vector3D getVertex(int index);
-	void setVertex(Vector3D in, int index);
-*/
+	//Shader* getShader() {return hit.shader;}
+	//Vector3D getNormal() {return hit.normal;}
+
 	void intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &inputHit);
 	bool intersect(const Ray rayIn);
 
+	Vector3D getPoints(int vertex);
+
 private:
 	Vector3D v0, v1, v2;
+	Vector3D v0color, v1color, v2color; //Used for per-vertex shading in rasterizer
 	float calculateT(const Ray rayIn);
 	float triangleArea(const Vector3D a, const Vector3D b, const Vector3D c);
 };

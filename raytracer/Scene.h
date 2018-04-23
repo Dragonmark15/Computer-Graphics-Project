@@ -18,6 +18,7 @@
 #include "Shader.h"
 #include "Blinn-Phong.h"
 #include "Reflective.h"
+#include "Glaze.h"
 #include "Sphere.h"
 #include "Triangle.h"
 #include "Box.h"
@@ -32,7 +33,6 @@ class Scene : public sivelab::SceneElementCreator {
 public:
 	Scene(int argc, char *argv[]);
 	void genImage();
-	bool useNormalForColor;
 	void instance( ptree::value_type const &v ); 
 	Vector3D raycolor(Ray rayIn, float tMin, float tMax, int recursionValue);
 	bool hasDirectLight(Vector3D location, Light light);
@@ -45,8 +45,10 @@ private:
 	int sceneWidth;
 	int sceneHeight;
 	int recursion;
+	bool rasterization;
 
-	//void rasterize();
+	void rasterize();
+	float rasterBaryCoords(Vector3D vec0, Vector3D vec1, float x, float y);
     void parseShapeData( ptree::value_type const &v );
     shaderData* parseShaderData( ptree::value_type const &v );
 

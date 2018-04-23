@@ -7,20 +7,7 @@ Reflective::Reflective(Scene* inputScenePtr) {
 	type = "Mirror";
 	ambient = 0.1;
 }
-/*
-Reflective::Reflective(Scene* inputScenePtr, Vector3D inputDiffuse) {
-	scenePtr = inputScenePtr;
-	diffuse = inputDiffuse;
-	type = "Glaze";
-	ambient = 0.1;
-}
-Reflective::Reflective(Scene* inputScenePtr, Vector3D inputDiffuse, float inputAmbient) {
-	scenePtr = inputScenePtr;
-	diffuse = inputDiffuse;
-	type = "Glaze";
-	ambient = inputAmbient;
-}
-*/
+
 Vector3D Reflective::apply(const Vector3D inputNormal, const Vector3D location, const Vector3D viewOrigin, Light lightVector, int recursionValue) {
 	Vector3D finalColor(0,0,0);	
 	if(recursionValue > 0) {

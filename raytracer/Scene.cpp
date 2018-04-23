@@ -2,7 +2,7 @@
 
 Scene::Scene(int argc, char *argv[])
 {
-	useNormalForColor = false;//Set to true to test normals
+	rasterization = false; //Determines if the system rasterizes or ray traces
 
 	GraphicsArgs args;
  	args.process(argc, argv);
@@ -41,63 +41,26 @@ Scene::Scene(int argc, char *argv[])
 }
 
 void Scene::genImage(){
-	png::image< png::rgb_pixel > imData( mainCamera.getPixelWidth(), mainCamera.getPixelHeight() );
-	Ray rayIn;
-	//HitStructure inputHit;
-	Vector3D finalColor;
-	for (size_t y = 0; y < imData.get_height(); ++y)
-	{
-		for (size_t x = 0; x < imData.get_width(); ++x)
+	if(rasterization)
+		rasterize();
+	else {
+		png::image< png::rgb_pixel > imData( mainCamera.getPixelWidth(), mainCamera.getPixelHeight() );
+		Ray rayIn;
+		//HitStructure inputHit;
+		Vector3D finalColor;
+		for (size_t y = 0; y < imData.get_height(); ++y)
 		{
-			rayIn.origin = mainCamera.getPosition();
-			rayIn.direction = mainCamera.genRay(x,y);
-			finalColor = raycolor(rayIn, mainCamera.getFocalLength(), 1e7, recursion);
-/*
-			tMax = 1e7;
-			inputHit.normal.set(0,0,0);
-			rayIn.origin = mainCamera.getPosition();
-			rayIn.direction = mainCamera.genRay(x,y);
-			//Iterate through all shapes
-			for(int i = 0; i < shapeVector.size(); i++)
+			for (size_t x = 0; x < imData.get_width(); ++x)
 			{
-				shapeVector[i]->intersect(rayIn, mainCamera.getFocalLength(), tMax, inputHit);
+				rayIn.origin = mainCamera.getPosition();
+				rayIn.direction = mainCamera.genRay(x,y);
+				finalColor = raycolor(rayIn, mainCamera.getFocalLength(), 1e7, recursion);
+				finalColor.clamp(0,1);
+				imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
 			}
-			//Set pixel color
-			if(inputHit.normal.length() != 0) { //Object was hit
-
-				//if(inputHit.shader->getType() != "Mirror")
-					finalColor = inputHit.shader->getDiffuse() * inputHit.shader->getAmbient(); //Ambient color
-
-				//Shadow Generation
-				Ray shadowRay;
-				shadowRay.origin = inputHit.point;
-				float tShadowMax;
-				HitStructure shadowHit;
-				bool hasDirectLight = false; //If false, need to calculate ambient color
-				for(int j = 0; j < lightVector.size(); j++) {
-					shadowRay.direction = lightVector[j].getPosition() - shadowRay.origin;
-					tShadowMax = 1e7;
-					for(int k = 0; k < shapeVector.size(); k++)
-					{
-						shapeVector[k]->intersect(shadowRay, 0.001, tShadowMax, shadowHit);
-					}
-					if(shadowHit.normal.length() == 0) { //No objects between primary object and light
-						hasDirectLight = true;
-						finalColor += inputHit.shader->apply(inputHit.normal, inputHit.point, mainCamera.getPosition(), lightVector[j]);
-					}
-				}
-
-				if(useNormalForColor)
-					finalColor.set((inputHit.normal[0]+1)*127, (inputHit.normal[1]+1)*127, (inputHit.normal[2]+1)*127);
-			}
-			else //No object hit
-				finalColor.set(bgColor);
-*/
-			finalColor.clamp(0,1);
-			imData[y][x] = png::rgb_pixel(finalColor[0]*255, finalColor[1]*255, finalColor[2]*255);
 		}
+		imData.write(outputFileName);
 	}
-	imData.write(outputFileName);
 }
 
 Vector3D Scene::raycolor(Ray rayIn, float tMin, float tMax, int recursionValue) {
@@ -342,6 +305,8 @@ void Scene::parseShapeData( ptree::value_type const &v )
 		newShader = new BlinnPhong(this, shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
 	else if (shape.shader.type == mirror)
 		newShader = new Reflective(this);
+	else if (shape.shader.type == glaze)
+		newShader = new Glaze(this, shape.shader.kd_diffuse, shape.shader.mirrorCoef);
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(this, shape.shader.kd_diffuse);
 
@@ -374,6 +339,8 @@ void Scene::parseShapeData( ptree::value_type const &v )
 		newShader = new BlinnPhong(this, shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
 	else if (shape.shader.type == mirror)
 		newShader = new Reflective(this);
+	else if (shape.shader.type == glaze)
+		newShader = new Glaze(this, shape.shader.kd_diffuse, shape.shader.mirrorCoef);
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(this, shape.shader.kd_diffuse);
 
@@ -409,6 +376,8 @@ void Scene::parseShapeData( ptree::value_type const &v )
 		newShader = new BlinnPhong(this, shape.shader.kd_diffuse, shape.shader.ks_specular, shape.shader.phongExp);
 	else if (shape.shader.type == mirror)
 		newShader = new Reflective(this);
+	else if (shape.shader.type == glaze)
+		newShader = new Glaze(this, shape.shader.kd_diffuse, shape.shader.mirrorCoef);
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(this, shape.shader.kd_diffuse);
 
@@ -483,6 +452,22 @@ shaderData* Scene::parseShaderData( ptree::value_type const &v )
         shaderPtr_toReturn->type = mirror;
     }
      
+    else if (type == "Glaze") {
+		sivelab::Vector3D kd;
+		float mCoef;
+
+		buf.str( v.second.get<std::string>("diffuse") );
+		buf >> kd;
+		buf.clear();
+
+		mCoef = v.second.get<float>("mirrorCoef");
+
+        shaderPtr_toReturn = new shaderData();
+        shaderPtr_toReturn->type = glaze;
+		shaderPtr_toReturn->kd_diffuse = kd;
+		shaderPtr_toReturn->mirrorCoef = mCoef;
+    }
+
     shaderPtr_toReturn->name = name;
     shaderMap[name] = shaderPtr_toReturn;
     
@@ -624,7 +609,7 @@ void Scene::OBJparse(GraphicsArgs args){
     	} 
 	}
 }
-/*
+
 void Scene::rasterize() {
 
 	//Setup Rasterization Matricies
@@ -654,41 +639,109 @@ void Scene::rasterize() {
 
 	Matrix4x4 Mcam = tempOrthoMatrix * tempCamLocation;
 
-	Matrix4x4 Mp; //TODO: Impliment transformation matrix support
-	Mp.setIdentity;
+	Matrix4x4 Mp(	n,	0,	0,		0,
+					0,	n,	0,		0,
+					0,	0,	n+f,	-1 * f * n,
+					0,	0,	1,		0);
 
-	Matrix4x4 Mlocal(	(2*n)/(r-l),	0,				(l+r)/(l-r),	0,
-						0,				(2*n)/(t-b),	(b+t)/(b-t),	0,
-						0,				0,				(f+n)/(n-f),	(2*f*n)/(f-n),
-						0,				0,				1,				0);
+	Matrix4x4 Mlocal; //Transform Matrix
+	Mlocal.setIdentity();	
 
 	Matrix4x4 M; //Set later in the for loop
 
 	std::vector<Shape*> updatedTriangles;
 
-	
+	float depthBuffer[sceneWidth][sceneHeight]; //Initialize depth buffer
+	for(int nx = 0; nx < sceneWidth; nx++) {
+		for(int ny = 0; ny < sceneHeight; ny++) {
+			depthBuffer[nx][ny] = 1e7; //A large number, so that anything rasterized can be smaller than it
+		}
+	}
+
+	png::image< png::rgb_pixel > imData( mainCamera.getPixelWidth(), mainCamera.getPixelHeight() );
 
 	//Begin Rasterization
 	for(int i = 0; i < shapeVector.size(); i++){
 		M = Mvp * Mortho * Mp;
-		Triangle* newTriangle = new Triangle(shapeVector[i]->getVertex(0),
-											shapeVector[i]->getVertex(1),
-											shapeVector[i]->getVertex(2),
-											shapeVector[i]->getShader(););
+		std::vector<Vector3D> trianglePoints;
+		std::vector<Vector3D> colorPoints; //A paired vector with triangle points, holds the color for the respective points
+
+		Triangle* newTriangle = new Triangle(shapeVector[i]->getPoints(0),
+											shapeVector[i]->getPoints(1),
+											shapeVector[i]->getPoints(2),
+											shapeVector[i]->getShader());
 		for(int j = 0; j <= 2; j++) { //For each vertex in the new triangle
-			double temp = 1;
-			Vector3D vCam = Mcam.multVector(Mlocal.multVector(newTriangle->getVertex(j),temp),temp);
-			//TODO: Shading
-			
-			
-		}		
+			double vsW = 1;
+			Vector3D vCam = Mcam.multVector(Mlocal.multVector(newTriangle->getPoints(j),vsW),vsW);
+			std::vector<Light> updatedLights;
+			for(int k = 0; k < lightVector.size(); k++) { //For each light in the scene
+				double temp2 = 1;
+				Vector3D lPos = Mcam.multVector(lightVector[k].getPosition(), temp2);
+				Light newLight(lPos, lightVector[k].getIntensity());
+				updatedLights.push_back(newLight);
+			}
+			for(int k  = 0; k < updatedLights.size(); k++) { //Shading for each light
+				colorPoints.push_back(shapeVector[i]->getShader()->apply(shapeVector[i]->getNormal(), vCam, mainCamera.getPosition(), updatedLights[k], 0));
+			}
+			trianglePoints.push_back(M.multVector(vCam,vsW));
+			trianglePoints[j] /= vsW;
+		}
+		int xMin, xMax, yMin, yMax;
+		xMin = trianglePoints[0][0]; //Set the base values for testing
+		xMax = trianglePoints[0][0];
+		yMin = trianglePoints[0][1];
+		yMax = trianglePoints[0][1];
+		if(trianglePoints[1][0] < xMin) //Test if other values are smaller/larger
+			xMin = trianglePoints[1][0];
+		if(trianglePoints[1][0] > xMax)
+			xMax = trianglePoints[1][0];
+		if(trianglePoints[1][1] < yMin)
+			yMin = trianglePoints[1][1];
+		if(trianglePoints[1][1] > xMin)
+			yMax = trianglePoints[1][1];
+		if(trianglePoints[2][0] < xMin) //Final vertex
+			xMin = trianglePoints[2][0];
+		if(trianglePoints[2][0] > xMax)
+			xMax = trianglePoints[2][0];
+		if(trianglePoints[2][1] < yMin)
+			yMin = trianglePoints[2][1];
+		if(trianglePoints[2][1] > xMin)
+			yMax = trianglePoints[2][1];
+		//if(xMin == xMax) xMax++;	//Prevent issues if triangle is axis aligned
+		//if(yMin == vMax) yMax++;
+
+		Vector3D pixelColor;
+
+		for(int x = xMin; x <= xMax; x++) {
+			for(int y = yMin; y <= yMax; y++) {
+				float alpha, beta, gamma;
+				alpha = rasterBaryCoords(trianglePoints[0], trianglePoints[1], x, y);
+				beta = rasterBaryCoords(trianglePoints[1], trianglePoints[2], x, y);
+				gamma = rasterBaryCoords(trianglePoints[2], trianglePoints[0], x, y);
+////////////////////////
+std::cout << "Triangle: " << i << "\nAlpha: " << alpha << "\nBeta: " << beta << "\nGamma: " << gamma << std::endl;
+////////////////////////
+				pixelColor.set(0,0,0);
+
+				if(alpha > 0 && beta > 0 && gamma > 0) {
+					pixelColor += (colorPoints[0] * alpha) + (colorPoints[1] * beta) + (colorPoints[2] * gamma);
+					if (x > 0 && y > 0 && x < sceneWidth && y < sceneHeight) { //Check bounds of image
+						float depth = trianglePoints[0][2]*alpha + trianglePoints[1][2]*beta + trianglePoints[2][2]*gamma;
+						if(depth < depthBuffer[x][y]) {
+							imData[y][x] = png::rgb_pixel(pixelColor[0]*255, pixelColor[1]*255, pixelColor[2]*255);
+							depthBuffer[x][y] = depth;
+						}
+					}
+				}
+			}
+		}
 	}
+	imData.write(outputFileName);
 }
-*/
 
-
-
-
+float Scene::rasterBaryCoords(Vector3D vec0, Vector3D vec1, float x, float y) {
+	return ( ((vec0[1] - vec1[1]) * x) + ((vec1[0] - vec0[0]) * y) + (vec0[0] * vec1[1]) - (vec1[0] * vec0[1]));
+}
 
 
 

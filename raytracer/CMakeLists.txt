@@ -14,6 +14,8 @@ add_library(raytracer
 	Shader.h LambertianShader.cpp
 	Blinn-Phong.cpp Blinn-Phong.h
 	Reflective.cpp Reflective.h
+	Matrix4x4.cpp Matrix4x4.h
+	Glaze.cpp Glaze.h
 )
 
 add_executable(Ray_Tracer

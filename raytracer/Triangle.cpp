@@ -72,9 +72,9 @@ float Triangle::triangleArea(const Vector3D a, const Vector3D b, const Vector3D 
 	Vector3D v = c - a;
 	return (float)(0.5 * u.cross(v).length());
 }
-/*
-Vector3D Triangle::getVertex(int index){
-	switch(index){
+
+Vector3D Triangle::getPoints(int vertex) {
+	switch(vertex) {
 		case 0:
 			return v0;
 			break;
@@ -85,28 +85,11 @@ Vector3D Triangle::getVertex(int index){
 			return v2;
 			break;
 		default:
-			std::cout << "Bad triangle vertex(get)" << std::endl;
-			exit(EXIT_FAILURE);
+			std::cerr << "ERROR: Bad value for getPoints" << std::endl;
+			return Vector3D(0,0,0);
 	}
 }
 
-void Triangle::setVertex(Vector3D in, int index) {
-	switch(index){
-		case 0:
-			v0 = in;
-			break;
-		case 1:
-			v1 = in;
-			break;
-		case 2:
-			v2 = in;
-			break;
-		default:
-			std::cout << "Bad triangle vertex(set)" << std::endl;
-			exit(EXIT_FAILURE);
-	}
-}
-*/
 
 
 

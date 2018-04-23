@@ -59,6 +59,7 @@ struct shaderData
     Vector3D kd_diffuse;
     Vector3D ks_specular;
     float phongExp;
+	float mirrorCoef;
 };
 
 //
