@@ -2,7 +2,7 @@
 
 Scene::Scene(int argc, char *argv[])
 {
-	rasterization = false; //Determines if the system rasterizes or ray traces
+	rasterization = true; //Determines if the system rasterizes or ray traces
 
 	GraphicsArgs args;
  	args.process(argc, argv);
@@ -53,15 +53,17 @@ void Scene::genImage(){
 		float xOffset;
 		//Setup proper offsets
 		int vertRays = (int)sqrt(rpp);
+		std::vector<Vector3D> rppColors;
 		while (rpp % vertRays != 0)
 			vertRays--;
 		int horzRays = rpp / vertRays;
+std::cout << "vert:" << vertRays << " horz:" << horzRays << std::endl;
 		for (size_t y = 0; y < imData.get_height(); ++y) { //Y screen loop
 			for (size_t x = 0; x < imData.get_width(); ++x) { //X screen loop
-				std::vector<Vector3D> rppColors;
+				rppColors.clear();
 				for (int a = 0; a < vertRays; a++) { //Vertical anti-aliasing loop
 					yOffset = a * (1 / (float)vertRays);
-					for (int b = 0; b < horzRays; a++) { //Horizontal anti-aliasing loop
+					for (int b = 0; b < horzRays; b++) { //Horizontal anti-aliasing loop
 						xOffset = a * (1 / (float)horzRays);
 						rayIn.origin = mainCamera.getPosition();
 						rayIn.direction = mainCamera.genRay(x, y, yOffset, xOffset);
@@ -71,9 +73,9 @@ void Scene::genImage(){
 					}
 				}
 				for (int c = 0; c < rpp; c++) {
-					finalColor += (pixelColor[c] / rpp);
+					finalColor += (rppColors[c] / rpp);
 				}
-				imData[y][x] = png::rgb_pixel(finalColor[0] * 255, finalColor[1] * 255, finalColor[2] * 255);
+				imData[y][x] = png::rgb_pixel(pixelColor[0] * 255, pixelColor[1] * 255, pixelColor[2] * 255); //TODO: should be finalColor, not pixelColor. pixel produces no AA, final creates a static-like screen
 			}
 		}
 		imData.write(outputFileName);
@@ -671,7 +673,7 @@ void Scene::rasterize() {
 	float depthBuffer[sceneWidth][sceneHeight]; //Initialize depth buffer
 	for(int nx = 0; nx < sceneWidth; nx++) {
 		for(int ny = 0; ny < sceneHeight; ny++) {
-			depthBuffer[nx][ny] = 1e7; //A large number, so that anything rasterized can be smaller than it
+			depthBuffer[nx][ny] = -1e7; //A large negative number, so that anything rasterized can be smaller than it
 		}
 	}
 
@@ -683,13 +685,9 @@ void Scene::rasterize() {
 		std::vector<Vector3D> trianglePoints;
 		std::vector<Vector3D> colorPoints; //A paired vector with triangle points, holds the color for the respective points
 
-		Triangle* newTriangle = new Triangle(shapeVector[i]->getPoints(0),
-											shapeVector[i]->getPoints(1),
-											shapeVector[i]->getPoints(2),
-											shapeVector[i]->getShader());
 		for(int j = 0; j <= 2; j++) { //For each vertex in the new triangle
 			double vsW = 1;
-			Vector3D vCam = Mcam.multVector(Mlocal.multVector(newTriangle->getPoints(j),vsW),vsW);
+			Vector3D vCam = Mcam.multVector(Mlocal.multVector(shapeVector[i]->getPoints(j),vsW),vsW);
 			std::vector<Light> updatedLights;
 			for(int k = 0; k < lightVector.size(); k++) { //For each light in the scene
 				double temp2 = 1;
@@ -703,6 +701,12 @@ void Scene::rasterize() {
 			trianglePoints.push_back(M.multVector(vCam,vsW));
 			trianglePoints[j] /= vsW;
 		}
+///////////////////////////
+std::cout << "\n//////////////Triangle " << i << "/////////////////" << std::endl;
+std::cout << "X: " << trianglePoints[0][0] << " Y: " << trianglePoints[0][1] << std::endl;
+std::cout << "X: " << trianglePoints[1][0] << " Y: " << trianglePoints[1][1] << std::endl;
+std::cout << "X: " << trianglePoints[2][0] << " Y: " << trianglePoints[2][1] << std::endl;
+//////////////////////////
 		int xMin, xMax, yMin, yMax;
 		xMin = trianglePoints[0][0]; //Set the base values for testing
 		xMax = trianglePoints[0][0];
@@ -714,7 +718,7 @@ void Scene::rasterize() {
 			xMax = trianglePoints[1][0];
 		if(trianglePoints[1][1] < yMin)
 			yMin = trianglePoints[1][1];
-		if(trianglePoints[1][1] > xMin)
+		if(trianglePoints[1][1] > yMax)
 			yMax = trianglePoints[1][1];
 		if(trianglePoints[2][0] < xMin) //Final vertex
 			xMin = trianglePoints[2][0];
@@ -722,29 +726,34 @@ void Scene::rasterize() {
 			xMax = trianglePoints[2][0];
 		if(trianglePoints[2][1] < yMin)
 			yMin = trianglePoints[2][1];
-		if(trianglePoints[2][1] > xMin)
+		if(trianglePoints[2][1] > yMax)
 			yMax = trianglePoints[2][1];
 		//if(xMin == xMax) xMax++;	//Prevent issues if triangle is axis aligned
 		//if(yMin == vMax) yMax++;
 
 		Vector3D pixelColor;
-
+		float falpha, fbeta, fgamma;
+		falpha = rasterBaryCoords(trianglePoints[1], trianglePoints[2], trianglePoints[0][0], trianglePoints[0][1]);
+		fbeta = rasterBaryCoords(trianglePoints[2], trianglePoints[0], trianglePoints[1][0], trianglePoints[1][1]);
+		fgamma = rasterBaryCoords(trianglePoints[0], trianglePoints[1], trianglePoints[2][0], trianglePoints[2][1]);
+////////////////////////
+std::cout << "Triangle: " << i << "\nfAlpha: " << falpha << "\nfBeta: " << fbeta << "\nfGamma: " << fgamma << "\nXmin/Max: " << xMin << "/" << xMax << "\nYmin/Max: " << yMin << "/" << yMax << std::endl;
+////////////////////////
 		for(int x = xMin; x <= xMax; x++) {
 			for(int y = yMin; y <= yMax; y++) {
+//////////////////////
+std::cout << ".";
+//////////////////////
 				float alpha, beta, gamma;
-				alpha = rasterBaryCoords(trianglePoints[0], trianglePoints[1], x, y);
-				beta = rasterBaryCoords(trianglePoints[1], trianglePoints[2], x, y);
-				gamma = rasterBaryCoords(trianglePoints[2], trianglePoints[0], x, y);
-////////////////////////
-std::cout << "Triangle: " << i << "\nAlpha: " << alpha << "\nBeta: " << beta << "\nGamma: " << gamma << std::endl;
-////////////////////////
+				alpha = rasterBaryCoords(trianglePoints[1], trianglePoints[2], x, y) / falpha;
+				beta = rasterBaryCoords(trianglePoints[2], trianglePoints[0], x, y) / fbeta;
+				gamma = rasterBaryCoords(trianglePoints[0], trianglePoints[1], x, y) / fgamma;
 				pixelColor.set(0,0,0);
-
 				if(alpha > 0 && beta > 0 && gamma > 0) {
 					pixelColor += (colorPoints[0] * alpha) + (colorPoints[1] * beta) + (colorPoints[2] * gamma);
 					if (x > 0 && y > 0 && x < sceneWidth && y < sceneHeight) { //Check bounds of image
 						float depth = trianglePoints[0][2]*alpha + trianglePoints[1][2]*beta + trianglePoints[2][2]*gamma;
-						if(depth < depthBuffer[x][y]) {
+						if(depth > depthBuffer[x][y]) {
 							imData[y][x] = png::rgb_pixel(pixelColor[0]*255, pixelColor[1]*255, pixelColor[2]*255);
 							depthBuffer[x][y] = depth;
 						}
@@ -759,12 +768,3 @@ std::cout << "Triangle: " << i << "\nAlpha: " << alpha << "\nBeta: " << beta << 
 float Scene::rasterBaryCoords(Vector3D vec0, Vector3D vec1, float x, float y) {
 	return ( ((vec0[1] - vec1[1]) * x) + ((vec1[0] - vec0[0]) * y) + (vec0[0] * vec1[1]) - (vec1[0] * vec0[1]));
 }
-
-
-
-
-
-
-
-
-
