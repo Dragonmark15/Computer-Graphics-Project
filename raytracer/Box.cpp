@@ -23,9 +23,10 @@ void Box::intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &inpu
 }
 
 bool Box::intersect(const Ray rayIn) {
-	bool hit;
+	bool hit = false;
 	for(int i = 0; i < boxTriangles.size() ; i++) {
 		hit = boxTriangles[i].intersect(rayIn);
+		if (hit) break;
 	}
 	return hit;
 }

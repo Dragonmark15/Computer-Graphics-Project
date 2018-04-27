@@ -11,7 +11,7 @@ using namespace sivelab;
 class Instance : public Shape {
 public:
 	~Instance(){}
-	Instance(Matrix4x4 inputMinv, Shape* inputOriginal, Shader* inputShader);
+	Instance(Matrix4x4 inputM, Shape* inputOriginal, Shader* inputShader);
 
 	void intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &hit);
 	bool intersect(const Ray rayIn);
