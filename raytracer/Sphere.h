@@ -1,6 +1,8 @@
 #ifndef __SPHERE_H__
 #define __SPHERE_H__
 
+#include <string>
+
 #include "Vector3D.h"
 #include "Shape.h"
 #include "Shader.h"
@@ -16,8 +18,7 @@ struct tValue {
 class Sphere : public Shape {
 public:
 	~Sphere(){}
-	//Sphere(Vector3D inputCenter, float inputRadius);
-	Sphere(Vector3D inputCenter, float inputRadius, Shader* inputShader);
+	Sphere(std::string inName, Vector3D inputCenter, float inputRadius, Shader* inputShader);
 
 	void intersect(const Ray rayIn, float tMin, float &tMax, HitStructure &hit);
 	bool intersect(const Ray rayIn);

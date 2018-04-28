@@ -11,7 +11,8 @@ Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2) {
 	hit.normal.normalize();
 }
 */
-Triangle::Triangle(Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Shader* inputShader) {
+Triangle::Triangle(std::string inName, Vector3D inputv0, Vector3D inputv1, Vector3D inputv2, Shader* inputShader) {
+	name = inName;
 	v0 = inputv0;
 	v1 = inputv1;
 	v2 = inputv2;

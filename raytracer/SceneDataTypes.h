@@ -72,6 +72,7 @@ struct shapeData
 {
     ShapeType type;
     std::string name;
+	std::string original;
 
     float radius;
     Vector3D center;

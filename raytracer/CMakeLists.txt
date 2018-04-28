@@ -16,6 +16,7 @@ add_library(raytracer
 	Reflective.cpp Reflective.h
 	Matrix4x4.cpp Matrix4x4.h
 	Glaze.cpp Glaze.h
+	Instance.cpp Instance.h
 )
 
 add_executable(Ray_Tracer

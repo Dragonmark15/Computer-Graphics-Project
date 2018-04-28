@@ -14,7 +14,7 @@ public:
 	Glaze(Scene* inputScenePtr, Vector3D inputDiffuse, float inputAmbient, float inputMirrorCoef);
 	Vector3D apply(const Vector3D inputNormal, const Vector3D location, const Vector3D cameraLocation, Light lightVector, int recursionValue);
 protected:
-	float mirrorCoef;
+	double mirrorCoef;
 	Shader* lambertianShader;
 	Reflective* reflectiveShader;
 };

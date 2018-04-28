@@ -22,6 +22,7 @@
 #include "Sphere.h"
 #include "Triangle.h"
 #include "Box.h"
+#include "Instance.h"
 #include "XMLSceneParser.h"
 #include "SceneDataTypes.h"
 #include "Matrix4x4.h"
@@ -37,6 +38,7 @@ public:
 	Vector3D raycolor(Ray rayIn, float tMin, float tMax, int recursionValue);
 	bool hasDirectLight(Vector3D location, Light light);
 private:
+	std::string inputFileName;
 	std::string outputFileName;
 	Vector3D bgColor;
 	Camera mainCamera;

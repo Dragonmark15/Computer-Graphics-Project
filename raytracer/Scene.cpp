@@ -9,7 +9,8 @@ Scene::Scene(int argc, char *argv[])
 	
 	//Set scene data retrieved from args
 	if(args.outputFileName != "") outputFileName = args.outputFileName;
-	else outputFileName = "Untitled";
+	else outputFileName = "Untitled.png";
+	inputFileName = args.inputFileName;
 	sceneWidth = args.width;
 	sceneHeight = args.height;
 	bgColor.set(0.25,0.25,0.25);	//Set a default value, in case XML doesn't specify
@@ -32,6 +33,7 @@ Scene::Scene(int argc, char *argv[])
 		xmlScene.registerCallback("shape", this);
 
 		xmlScene.parseFile( args.inputFileName );
+
 	}
 	else
 	{
@@ -46,6 +48,20 @@ void Scene::genImage(){
 		rasterize();
 	else {
 		png::image< png::rgb_pixel > imData( mainCamera.getPixelWidth(), mainCamera.getPixelHeight() );
+
+		//Temporary hard-coding of instanced object
+		if(inputFileName.find("finalRayTracerTest.xml") != std::string::npos) {
+			Shader* mirrorShader = new Reflective(this);
+			Shape* pointer = NULL;
+			for(int i = 0; i < shapeVector.size(); i++){
+				if(shapeVector[i]->getName() == "frontBox") {
+					pointer = shapeVector[i];
+				}
+			}
+			Instance* instanceShape = new Instance("testInstance",pointer,mirrorShader);
+			shapeVector.push_back(instanceShape);
+		}
+
 		Ray rayIn;
 		Vector3D pixelColor;
 		Vector3D finalColor(0,0,0);
@@ -57,9 +73,15 @@ void Scene::genImage(){
 		while (rpp % vertRays != 0)
 			vertRays--;
 		int horzRays = rpp / vertRays;
-std::cout << "vert:" << vertRays << " horz:" << horzRays << std::endl;
+		int tenPercent = (imData.get_height() * imData.get_width()) / 10;
+		int progressCounter = 0;
 		for (size_t y = 0; y < imData.get_height(); ++y) { //Y screen loop
 			for (size_t x = 0; x < imData.get_width(); ++x) { //X screen loop
+				if(progressCounter >= tenPercent) {
+					std::cout << ".\n";
+					progressCounter = 0;
+				}
+				else progressCounter++;
 				rppColors.clear();
 				finalColor.set(0,0,0);
 				for (int a = 0; a < vertRays; a++) { //Vertical anti-aliasing loop
@@ -330,7 +352,7 @@ void Scene::parseShapeData( ptree::value_type const &v )
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(this, shape.shader.kd_diffuse);
 
-	shapeVector.push_back(new Sphere(shape.center, shape.radius, newShader));
+	shapeVector.push_back(new Sphere(shape.name, shape.center, shape.radius, newShader));
 
     std::cout << "\tFound sphere!" << std::endl;
   }
@@ -364,7 +386,7 @@ void Scene::parseShapeData( ptree::value_type const &v )
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(this, shape.shader.kd_diffuse);
 
-	shapeVector.push_back(new Box(shape.minPt, shape.maxPt, newShader));
+	shapeVector.push_back(new Box(shape.name, shape.minPt, shape.maxPt, newShader));
     std::cout << "\tFound box!" << std::endl;
   }
 
@@ -401,7 +423,7 @@ void Scene::parseShapeData( ptree::value_type const &v )
 	else if (shape.shader.type == lambertian)
 		newShader = new Shader(this, shape.shader.kd_diffuse);
 
-	shapeVector.push_back(new Triangle(shape.v0, shape.v1, shape.v2, newShader));
+	shapeVector.push_back(new Triangle(shape.name, shape.v0, shape.v1, shape.v2, newShader));
 
     std::cout << "\tFound triangle!" << std::endl;
   }
@@ -614,7 +636,7 @@ void Scene::OBJparse(GraphicsArgs args){
       		// know if you do this!
       		// 
       		// Using the actual vertices of the triangle, instance a new triangle!
-      		Triangle *tPtr = new Triangle( tv0, tv1, tv2, newShader);
+      		Triangle *tPtr = new Triangle("OBJ", tv0, tv1, tv2, newShader);
 
       		// In case you're interested, the OBJ files also provide the
       		// normal vectors at each vertex. You can access them like this:
