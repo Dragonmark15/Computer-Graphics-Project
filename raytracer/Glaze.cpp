@@ -26,5 +26,9 @@ Glaze::Glaze(Scene* inputScenePtr, Vector3D inputDiffuse, float inputAmbient, fl
 Vector3D Glaze::apply(const Vector3D inputNormal, const Vector3D location, const Vector3D cameraLocation, Light lightVector, int recursionValue) {
 	Vector3D lamColor = lambertianShader->apply(inputNormal, location, cameraLocation, lightVector, recursionValue);
 	Vector3D refColor = reflectiveShader->apply(inputNormal, location, cameraLocation, lightVector, recursionValue);
-	return (refColor * (1 - mirrorCoef)) + (lamColor * mirrorCoef);
+	Vector3D finalColor = (refColor * (1 - mirrorCoef)) + (lamColor * mirrorCoef);
+////////////////////////////////////////////
+std::cout << "LamColor: " << lamColor << std::endl << "RefColor: " << refColor << std::endl << "MirrorCoef: " << mirrorCoef << std::endl << "FinalColor: " << finalColor << std::endl;
+////////////////////////////////////////////
+	return finalColor;
 }

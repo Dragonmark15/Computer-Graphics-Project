@@ -2,7 +2,7 @@
 
 Scene::Scene(int argc, char *argv[])
 {
-	rasterization = true; //Determines if the system rasterizes or ray traces
+	rasterization = false; //Determines if the system rasterizes or ray traces
 
 	GraphicsArgs args;
  	args.process(argc, argv);
@@ -61,6 +61,7 @@ std::cout << "vert:" << vertRays << " horz:" << horzRays << std::endl;
 		for (size_t y = 0; y < imData.get_height(); ++y) { //Y screen loop
 			for (size_t x = 0; x < imData.get_width(); ++x) { //X screen loop
 				rppColors.clear();
+				finalColor.set(0,0,0);
 				for (int a = 0; a < vertRays; a++) { //Vertical anti-aliasing loop
 					yOffset = a * (1 / (float)vertRays);
 					for (int b = 0; b < horzRays; b++) { //Horizontal anti-aliasing loop
@@ -75,7 +76,7 @@ std::cout << "vert:" << vertRays << " horz:" << horzRays << std::endl;
 				for (int c = 0; c < rpp; c++) {
 					finalColor += (rppColors[c] / rpp);
 				}
-				imData[y][x] = png::rgb_pixel(pixelColor[0] * 255, pixelColor[1] * 255, pixelColor[2] * 255); //TODO: should be finalColor, not pixelColor. pixel produces no AA, final creates a static-like screen
+				imData[y][x] = png::rgb_pixel(finalColor[0] * 255, finalColor[1] * 255, finalColor[2] * 255);
 			}
 		}
 		imData.write(outputFileName);
@@ -84,7 +85,7 @@ std::cout << "vert:" << vertRays << " horz:" << horzRays << std::endl;
 
 Vector3D Scene::raycolor(Ray rayIn, float tMin, float tMax, int recursionValue) {
 	HitStructure inputHit;
-	Vector3D finalColor;
+	Vector3D finalColor(0,0,0);
 	inputHit.normal.set(0,0,0);
 	//Iterate through all shapes
 	for(int i = 0; i < shapeVector.size(); i++){
@@ -701,12 +702,7 @@ void Scene::rasterize() {
 			trianglePoints.push_back(M.multVector(vCam,vsW));
 			trianglePoints[j] /= vsW;
 		}
-///////////////////////////
-std::cout << "\n//////////////Triangle " << i << "/////////////////" << std::endl;
-std::cout << "X: " << trianglePoints[0][0] << " Y: " << trianglePoints[0][1] << std::endl;
-std::cout << "X: " << trianglePoints[1][0] << " Y: " << trianglePoints[1][1] << std::endl;
-std::cout << "X: " << trianglePoints[2][0] << " Y: " << trianglePoints[2][1] << std::endl;
-//////////////////////////
+
 		int xMin, xMax, yMin, yMax;
 		xMin = trianglePoints[0][0]; //Set the base values for testing
 		xMax = trianglePoints[0][0];
@@ -728,22 +724,14 @@ std::cout << "X: " << trianglePoints[2][0] << " Y: " << trianglePoints[2][1] << 
 			yMin = trianglePoints[2][1];
 		if(trianglePoints[2][1] > yMax)
 			yMax = trianglePoints[2][1];
-		//if(xMin == xMax) xMax++;	//Prevent issues if triangle is axis aligned
-		//if(yMin == vMax) yMax++;
 
 		Vector3D pixelColor;
 		float falpha, fbeta, fgamma;
 		falpha = rasterBaryCoords(trianglePoints[1], trianglePoints[2], trianglePoints[0][0], trianglePoints[0][1]);
 		fbeta = rasterBaryCoords(trianglePoints[2], trianglePoints[0], trianglePoints[1][0], trianglePoints[1][1]);
 		fgamma = rasterBaryCoords(trianglePoints[0], trianglePoints[1], trianglePoints[2][0], trianglePoints[2][1]);
-////////////////////////
-std::cout << "Triangle: " << i << "\nfAlpha: " << falpha << "\nfBeta: " << fbeta << "\nfGamma: " << fgamma << "\nXmin/Max: " << xMin << "/" << xMax << "\nYmin/Max: " << yMin << "/" << yMax << std::endl;
-////////////////////////
 		for(int x = xMin; x <= xMax; x++) {
 			for(int y = yMin; y <= yMax; y++) {
-//////////////////////
-std::cout << ".";
-//////////////////////
 				float alpha, beta, gamma;
 				alpha = rasterBaryCoords(trianglePoints[1], trianglePoints[2], x, y) / falpha;
 				beta = rasterBaryCoords(trianglePoints[2], trianglePoints[0], x, y) / fbeta;
