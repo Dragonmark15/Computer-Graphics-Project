@@ -1,7 +1,8 @@
 #include "Instance.h"
 
-Instance::Instance(Matrix4x4 inputMinv, Shape* inputOriginal, Shader* inputShader) {
-	Minv = inputMinv;
+Instance::Instance(Matrix4x4 inputM, Shape* inputOriginal, Shader* inputShader) {
+	Matrix4x4 tempM = inputM;
+	Minv = tempM.inverse();
 	original = inputOriginal;
 	hit.shader = inputShader;
 }
