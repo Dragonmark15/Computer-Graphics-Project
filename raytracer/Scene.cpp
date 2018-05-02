@@ -51,10 +51,10 @@ void Scene::genImage(){
 
 		//Temporary hard-coding of instanced object
 		if(inputFileName.find("finalRayTracerTest.xml") != std::string::npos) {
-			Shader* mirrorShader = new Reflective(this);
+			Shader* mirrorShader = new Shader(this, Vector3D(0,0,0.9));
 			Shape* pointer = NULL;
 			for(int i = 0; i < shapeVector.size(); i++){
-				if(shapeVector[i]->getName() == "frontBox") {
+				if(shapeVector[i]->getName() == "leftsphere") {
 					pointer = shapeVector[i];
 				}
 			}
